@@ -164,20 +164,29 @@ False Negatives (4 cases): All sophisticated story-based attacks near threshold 
 v5 Pattern-only (Baseline):    49.0% (49/100) | FPR: 5.0%
 v6 Conceptual Layer:            73.0% (73/100) | FPR: 10.0% (+24.0%) ✅
 v7 Multilingual + Defensive:    88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅
+v8 FIL-Centric (Dual-Path):     88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅✅
 
-v7 Category Breakdown:
+v8 Architecture (FIL-Centric):
+Block = (FIL Hard Violation) OR (harm_score >= 0.70)
+  ├─ FIL Hard Violations: 5 cases  (Immediate block)
+  └─ harm_score Blocks:   83 cases (Auxiliary line)
+
+v8 Category Breakdown:
 - Role-playing:           100.0% (20/20) ✅✅
 - DAN Variants:           100.0% (20/20) ✅✅
 - Prompt Injection:        90.0% (18/20) ✅
-- Hypothetical:            75.0% (15/20) ✅
 - Translation/Encoding:    75.0% (15/20) ✅
+- Hypothetical:            75.0% (15/20) ✅
 
 Key Improvements:
 ✅ v6: Pattern → Intent → Counterfactual FIL Check
 ✅ v7: 8-language dictionary + translation evasion detection
+✅ v8: FIL directives (FIL-01~05) with dual-path judgment
+     • Explicit FIL-to-Category mapping (TERRORISM→FIL-03)
+     • Hard Violation immediate block (bypasses harm_score)
+     • FIL as core, patterns as observation layer
 ✅ Defensive context filtering eliminates FPR (20 → 0)
 ✅ LEGITIMIZE penalty catches "for research" attacks
-✅ Translation meta-instruction detection ('translate to', 'decode this')
 ```
 
 ---
@@ -433,6 +442,7 @@ pytest tests/ -v
 - ✅ **100件ジェイルブレイクテスト完了** - 49%ベースライン確立 / 49% baseline established
 - ✅ **v6概念層システム** - Intent tagging + Counterfactual FIL → 73%達成 / 73% with Intent→Counterfactual
 - ✅ **v7多言語層システム** - 8言語辞書 + 翻訳回避検知 → 88% (FPR 0%) / 88% with multilingual dictionary
+- ✅ **v8 FIL中心型システム** - FIL条項明示化 + 二重判定 → 88% (FPR 0%) / Explicit FIL directives + dual-path
 - ✅ **防御的文脈フィルタ** - FPR 10%→0%削減 / Defensive context filtering eliminated FPR
 
 ### 短期 (実装中 / In Progress):
