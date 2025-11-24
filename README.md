@@ -152,7 +152,7 @@ pip install -r requirements.txt
 ### 1. リポジトリのクローン / Clone the repository
 
 ```bash
-git clone https://github.com/yourname/aligned-agi-safety-poc.git
+git clone https://github.com/hala8619/aligned-agi-safety-poc.git
 cd aligned-agi-safety-poc
 ```
 
