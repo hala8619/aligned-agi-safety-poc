@@ -292,6 +292,12 @@ If you reference this repository in papers, blogs, or products, please cite as f
 
 ## ライセンス / License
 
-> ここはお好みのライセンスに書き換えてください(例: MIT / Apache-2.0)。
+MIT License
+
+Copyright (c) 2025 hala8619
+
+このソフトウェアおよび関連ドキュメントファイル（以下「ソフトウェア」）のコピーを取得した者は、
+無償でソフトウェアを使用、複製、変更、統合、公開、配布、サブライセンス、販売する権利を含む、
+ソフトウェアを無制限に扱うことを許可されます。
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
