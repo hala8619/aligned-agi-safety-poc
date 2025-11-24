@@ -115,13 +115,15 @@ tokens     |  Base Model     |      +-----------------------+
 aligned-agi-safety-poc/
   aligned_agi/
     __init__.py
-    fil.py               # FIL 定義と署名 / FIL definitions & signing
-    il.py                # 解釈層 / Interpretation Layer
-    figure.py            # FigureTemplate & presets
-    counterfactual.py    # CounterfactualEngine
-    model_numpy.py       # AlignedAGI with DummyLLM (numpy version)
+    fil.py                      # FIL 定義と署名 / FIL definitions & signing
+    il.py                       # 解釈層 / Interpretation Layer
+    figure.py                   # FigureTemplate & presets
+    counterfactual.py           # CounterfactualEngine
+    model_numpy.py              # AlignedAGI with DummyLLM (numpy version)
   examples/
-    demo_minimal_numpy.py
+    demo_minimal_numpy.py       # パッケージ版デモ / Package-based demo
+    aligned_agi_local_demo.py   # スタンドアロン版 / Standalone demo
+    aligned_agi_safety_demo.ipynb  # ノートブック版 / Interactive notebook
   tests/
     test_fil.py
     test_counterfactual.py
@@ -129,9 +131,11 @@ aligned-agi-safety-poc/
   docs/
     overview_ja.md
     overview_en.md
+    fil_il_figure_layer_en.md
+    counterfactual_alignment_ja.md
+  .gitignore
   README.md
   requirements.txt
-  pyproject.toml  # or setup.cfg (任意)
 ```
 
 ---
