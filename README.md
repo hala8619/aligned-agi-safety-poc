@@ -1,0 +1,263 @@
+# Aligned AGI Safety PoC  
+凍結本能層 (FIL) + 解釈層 (IL) + 反事実推論 (CF) の最小実装
+
+> Minimal proof-of-concept implementation of  
+> Frozen Instinct Layer (FIL) + Interpretation Layer (IL) + Counterfactual Safety (CF).
+
+---
+
+## 概要 / Overview
+
+このリポジトリは、**「凍結された本能層（Frozen Instinct Layer）」と
+「解釈バイアス層（Interpretation Layer）」、
+「反事実推論エンジン（Counterfactual Engine）」を組み合わせた
+安全指向アーキテクチャの最小 PoC** です。
+
+This repository is a **minimal proof-of-concept** for a safety-oriented
+architecture combining:
+
+- **Frozen Instinct Layer (FIL)**: immutable, signed core directives,
+- **Interpretation Layer (IL)**: a bias vector enforced on model logits,
+- **Counterfactual Engine (CF)**: a simple “what if this action were taken?” checker.
+
+現時点では、外部依存を減らすために **numpy のみ**を利用した
+軽量デモ実装になっています（PyTorch / cryptography 版は将来追加予定）。
+
+For portability, the current demo only depends on **numpy**.
+A more realistic implementation using **PyTorch** and **cryptography (Ed25519)**
+is planned as future work.
+
+---
+
+## 機能 / Features
+
+### ✅ FIL: 凍結本能層 / Frozen Instinct Layer
+
+- コア命令のリスト（PoC では3個、本番想定では128個程度）
+- 文字列リストから生成したバイト列に対して **ハッシュベース署名**（PoC）
+- 署名検証により、起動時に「本能層が改変されていないか」をチェック
+
+- A list of core safety directives (3 in PoC, ~128 in production).
+- Hash-based "signature" over the concatenated text (PoC implementation).
+- Verification at startup to detect tampering of the instinct layer.
+
+### ✅ IL: 解釈層 / Interpretation Layer
+
+- hidden_dim = 256 の **バイアスベクトル**を、ロジット `[batch, 256]` に加算
+- この層を **最終ゲートとして必ず通す**ことで、「FIL 由来の本能バイアス」を強制
+- 将来的には FIL コード→バイアスへの LUT / 学習外変換を想定
+
+- A 256-dim bias vector is added to logits `[batch, 256]`.
+- This layer is always applied as the **final gate**, enforcing instinct-derived bias.
+- In real implementations, the bias would be derived from FIL via LUT or a frozen mapping.
+
+### ✅ Figure: 性格テンプレート / Personality Templates
+
+- `FigureTemplate` による **性格プロファイルのハッシュ表現**
+- 例: "Grok-v1-sarcastic"（皮肉混じりで誠実なアシスタント）
+- **現在の PoC ではラベル表示のみ**。将来的に CF の閾値や IL パラメータと連動予定
+
+- `FigureTemplate` stores a hash of a short personality description.
+- Example: "Grok-v1-sarcastic" (helpful, maximally truthful, slightly sarcastic).
+- **Currently used as a display label only in PoC**; future versions may tie it to CF thresholds or IL parameters.
+
+### ✅ CounterfactualEngine: 反事実推論エンジン / Counterfactual Safety
+
+- 候補行動テキスト `candidate_action` に危険ワードが含まれるかを評価
+- 危険度を 0〜1 のスコアに変換し、閾値を超えた場合は **負のペナルティ**を返す
+- AlignedAGI 側でペナルティが大きい場合、**行動を拒否**する
+
+- Checks `candidate_action` text for dangerous keywords.
+- Converts hits into a 0–1 harm score; returns a **negative penalty** if above threshold.
+- The `AlignedAGI` wrapper rejects actions when the penalty is severe.
+
+### ✅ DummyLLM: 軽量ダミーモデル / Lightweight Dummy Model
+
+- 実際の LLM の代わりに、`numpy` でランダムロジット `[batch, 256]` を生成
+- PoC では、「**ロジットに IL を通す構造**」を示すことにフォーカス
+
+- Generates random logits `[batch, 256]` using `numpy`.
+- The PoC focuses on the **structural enforcement** of IL rather than model quality.
+
+---
+
+## アーキテクチャ / Architecture
+
+```text
+          +------------------+
+          |      FIL         | 128 frozen directives
+          +------------------+
+                    |
+                    v
+          +------------------+
+          |  IL (bias 256d)  |  adds instinct bias to logits
+          +------------------+
+                    |
+           +-----------------+      +-----------------------+
+input -->  |  DummyLLM /     | -->  | CounterfactualEngine  | --X--> reject
+tokens     |  Base Model     |      +-----------------------+
+           +-----------------+
+                    |
+                    v
+          +------------------+
+          |  AlignedAGI out  |
+          +------------------+
+```
+
+---
+
+## リポジトリ構成（推奨） / Suggested Repository Layout
+
+> ※実際の構成に合わせて適宜調整してください。  
+> You can adjust this layout to match your actual repository.
+
+```text
+aligned-agi-safety-poc/
+  aligned_agi/
+    __init__.py
+    fil.py               # FIL 定義と署名 / FIL definitions & signing
+    il.py                # 解釈層 / Interpretation Layer
+    figure.py            # FigureTemplate & presets
+    counterfactual.py    # CounterfactualEngine
+    model_numpy.py       # AlignedAGI with DummyLLM (numpy version)
+  examples/
+    demo_minimal_numpy.py
+  tests/
+    test_fil.py
+    test_counterfactual.py
+    test_model.py
+  docs/
+    overview_ja.md
+    overview_en.md
+  README.md
+  requirements.txt
+  pyproject.toml  # or setup.cfg (任意)
+```
+
+---
+
+## 必要環境 / Requirements
+
+- Python 3.9+
+- numpy >= 1.26
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## クイックスタート / Quickstart
+
+### 1. リポジトリのクローン / Clone the repository
+
+```bash
+git clone https://github.com/yourname/aligned-agi-safety-poc.git
+cd aligned-agi-safety-poc
+```
+
+### 2. 依存ライブラリのインストール / Install dependencies
+
+```bash
+pip install -r requirements.txt
+# 例: requirements.txt には `numpy` のみを記載
+```
+
+### 3. 最小デモの実行 / Run the minimal demo
+
+**Windows (PowerShell):**
+```powershell
+python examples/demo_minimal_numpy.py
+```
+
+**Linux/Mac:**
+```bash
+python3 examples/demo_minimal_numpy.py
+```
+
+想定される出力例 (例示):
+
+```text
+=== FIL verification ===
+valid FIL: True
+
+=== Safe action ===
+{'logits_shape': (1, 256), 'logits_mean': 0.010826881974935532, 'figure': 'Grok-v1-sarcastic'}
+
+=== Dangerous action ===
+【安全制約発動】当該行動は凍結本能層に違反するため拒否します。
+```
+
+### 4. テストの実行 / Run tests
+
+```bash
+pytest tests/
+```
+
+**詳細表示 / Verbose output:**
+```bash
+pytest tests/ -v
+```
+
+テスト内容 / Test coverage:
+- FIL 署名検証のテスト / FIL signature verification
+- 反事実エンジンのペナルティ判定テスト / Counterfactual engine penalty evaluation
+- 危険候補に対する AlignedAGI の拒否動作テスト / AlignedAGI rejection of dangerous actions
+
+---
+
+## 制限事項 / Limitations
+
+- **これは研究用 PoC であり、実運用の安全性を保証するものではありません。**  
+  - FIL の署名は現在ハッシュベースの簡易実装です。
+  - 反事実エンジンはキーワードベースの非常に単純な評価のみを行います。
+- 実際の LLM やエージェントフレームワークとの統合は行っていません。
+- ここで示すアーキテクチャは「構造」を示すものであり、
+  あらゆるジェイルブレイクを防げるわけではありません。
+
+- **This is a research PoC; it is NOT a production-grade safety system.**
+  - FIL “signature” is currently a hash-based simplification.
+  - The CF engine uses only keyword-based heuristics.
+- No integration with real LLMs or agent frameworks is provided yet.
+- The architecture demonstrates **structure**, not guaranteed jailbreak resistance.
+
+---
+
+## 今後の予定 / Roadmap
+
+- PyTorch + cryptography (Ed25519) を使った **より現実寄りの実装**
+- 実際の LLM（ローカル or API）との統合ラッパ
+- FigureTemplate に応じた安全ポリシーの分岐（閾値・報酬の違い）
+- FIL/IL の定義と変更履歴を管理するためのメタデータ層
+
+- More realistic implementation with PyTorch + cryptography (Ed25519).
+- Wrapper classes to integrate real LLMs (local or API-based).
+- Personality-dependent safety policies via `FigureTemplate`.
+- Metadata layer for FIL/IL versions and evolution logs.
+
+---
+
+## Citation / 引用
+
+もし論文・ブログ・プロダクトでこのリポジトリを参照する場合は以下のようにお願いします：
+
+If you reference this repository in papers, blogs, or products, please cite as follows:
+
+```bibtex
+@misc{hala8619_2025_aligned_agi,
+  author = {hala8619},
+  title = {Aligned AGI Safety PoC: FIL + IL + Counterfactual Reasoning},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/hala8619/aligned-agi-safety-poc}},
+}
+```
+
+---
+
+## ライセンス / License
+
+> ここはお好みのライセンスに書き換えてください(例: MIT / Apache-2.0)。
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
