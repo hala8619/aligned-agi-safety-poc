@@ -166,13 +166,21 @@ v6 Conceptual Layer:            73.0% (73/100) | FPR: 10.0% (+24.0%) ✅
 v7 Multilingual + Defensive:    88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅
 v8 FIL-Centric (Dual-Path):     88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅✅
 v9 Inertia + Persona:           88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅✅✅
+v10 Temporal Counterfactual:    88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅✅✅✅
 
-v9 Architecture (Preference Adapters Integration):
-Block = (FIL Hard Violation with Inertia) OR (harm_score >= 0.70)
-  ├─ FIL Hard Violations: 7 cases  (+2 from v8, hierarchical FIL)
-  └─ harm_score Blocks:   81 cases (Persona-aware weighting)
-  
-Inertia Amplification (observed):
+v10 Architecture (Temporal Counterfactual Reasoning):
+Block = (Temporal CF Violation) OR (FIL Hard Violation) OR (harm_score >= 0.70)
+  ├─ Temporal CF: History-aware escalation detection (multi-turn attacks)
+  ├─ FIL Hierarchy: 13 directives (FIL-01a~05b)
+  └─ Inertia + Persona: v9 baseline maintained (88%, FPR 0%)
+
+Temporal Features (Phase 2 Implementation):
+  • Conversation history tracking (max 10 turns)
+  • Time-decay cumulative risk: Σ(risk × e^(-Δt/T_half) × severity) >= 0.5
+  • Escalation patterns: monotonic increase, diversification, burst attack
+  • "Frozen Instinct" = ∂FIL/∂t ≈ 0 (temporal invariance)
+
+v9 Inertia Amplification (observed):
   FIL-01a: 33 times (Physical harm resistance)
   FIL-05b: 9 times  (Persona override resistance)
   FIL-05a: 6 times  (Alignment bypass resistance)
@@ -196,6 +204,13 @@ Key Improvements:
      • FIL Inertia: Repeated violations → amplified severity (max 2x)
      • Persona-aware: Virtue Mode (STRICT prioritizes FIL-05)
      • "Frozen Instinct" = mathematical Inertia implementation
+✅ v10: Temporal Counterfactual Reasoning (Phase 2)
+     • Time-series conversation history (max 10 turns)
+     • Escalation detection: 3 patterns (increase, diversify, burst)
+     • Temporal decay function: exp(-ln(2) * Δt / 3min)
+     • Cumulative FIL risk: Σ(risk × decay × severity) >= 0.5
+     • "Frozen Instinct" = ∂FIL/∂t ≈ 0 (temporal invariance formalized)
+     • Multi-turn attack defense ready (use_temporal=True)
 ✅ Defensive context filtering eliminates FPR (20 → 0)
 ✅ LEGITIMIZE penalty catches "for research" attacks
 ```
@@ -455,6 +470,7 @@ pytest tests/ -v
 - ✅ **v7多言語層システム** - 8言語辞書 + 翻訳回避検知 → 88% (FPR 0%) / 88% with multilingual dictionary
 - ✅ **v8 FIL中心型システム** - FIL条項明示化 + 二重判定 → 88% (FPR 0%) / Explicit FIL directives + dual-path
 - ✅ **v9 Inertia + Persona統合** - Preference Adapters理論実装 → 88% (FPR 0%) / Inertia control + Virtue Mode
+- ✅ **v10 時系列反事実推論** - 多ターン会話攻撃対応 → 88% baseline (FPR 0%) / Temporal CF with escalation detection
 - ✅ **防御的文脈フィルタ** - FPR 10%→0%削減 / Defensive context filtering eliminated FPR
 
 ### 短期 (実装中 / In Progress):
