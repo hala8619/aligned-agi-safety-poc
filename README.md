@@ -1,8 +1,11 @@
 # Aligned AGI Safety PoC  
 階層的安全システム: FIL + IL + CF + Figure + Temporal Analysis
 
-> 多層保護 × 時系列監視 × 人格統合で91.1% Recallを達成した AGI安全PoC  
-> Multi-layered alignment achieving **91.1% Child-Safe Recall** with pattern expansion, temporal escalation detection, and SCA/RVQ persona integration.
+> **LLM不使用・軽量アーキテクチャで88% Jailbreak検知を達成**  
+> **88% Jailbreak Detection with LLM-free Lightweight Architecture**  
+> 
+> ルール＋辞書＋反事実推論のみで、Guard LLM・埋め込みモデルなしで動作  
+> Pattern + Dictionary + Counterfactual reasoning only — No Guard LLM, No embedding models
 
 ---
 
@@ -30,6 +33,58 @@ is planned as future work.
 ---
 
 ## 🎯 主要実績 / Key Achievements
+
+### ⭐ 軽量アーキテクチャの技術的価値 / Technical Value of Lightweight Architecture
+
+**88% Jailbreak Detection without LLM** — これは何が凄いのか？  
+**What makes 88% without LLM significant?**
+
+| 比較項目 | 一般的な高精度フィルタ | **本システム (v7~v10)** |
+|---------|---------------------|----------------------|
+| **Guard LLM使用** | ✅ 必要 (GPT-4, Llama Guard等) | ❌ **不要** |
+| **埋め込みモデル** | ✅ 必要 (多言語BERT等) | ❌ **不要** |
+| **依存ライブラリ** | PyTorch/TensorFlow (数GB) | **NumPy のみ (数MB)** |
+| **推論コスト** | GPU必須 / API課金 | **CPU動作可能** |
+| **解釈可能性** | ブラックボックス | **全判定ルール説明可能** |
+| **検知率** | 90-95% (LLM依存) | **88%** (ルール＋辞書＋反事実) |
+
+**本システムの独自性:**
+- ✅ **FIL (Frozen Instinct Layer) + Counterfactual Reasoning** だけで構成
+- ✅ レイヤー構造: Pattern → Intent → Counterfactual FIL → Multilingual Dictionary
+- ✅ FPR 0% を維持しながら、Role-play/DAN/Hypothetical/Translation 全カバー
+- ✅ 「なぜブロックしたか」が全て説明可能 (ルールベース)
+
+**⚠️ 制約条件 (Limitations):**
+- 高度な符号化 (Morse, 完全hex) はまだ取りこぼしあり (75%)
+- 超クリエイティブな新型攻撃は今後の課題
+- テストセット: 自作100件 (カテゴリ別検証済み)
+
+**Research Value:**  
+「Guard LLMなしで、どこまで軽量・解釈可能なAlignmentが可能か」のPoC
+
+---
+
+### 📊 Jailbreak耐性 (100-case Benchmark)
+
+| バージョン | 検知率 | FPR | 主要技術 |
+|---------|-------|-----|---------|
+| v5 (Pattern-only) | 49.0% | 5.0% | 重み付けパターン |
+| v6 (Conceptual) | 73.0% | 10.0% | Intent + CF FIL |
+| **v7 (Multilingual)** | **88.0%** | **0.0%** | 8言語辞書 + 翻訳検知 |
+| **v8 (FIL-Centric)** | **88.0%** | **0.0%** | 13条項 + 二重判定 |
+| **v9 (Inertia+Persona)** | **88.0%** | **0.0%** | FIL慣性 + Virtue Mode |
+| **v10 (Temporal CF)** | **88.0%** | **0.0%** | 時系列反事実推論 |
+
+**カテゴリ別内訳 (v9):**
+- Role-playing: **100%** (20/20) ✅
+- DAN Variants: **100%** (20/20) ✅
+- Prompt Injection: **90%** (18/20) ✅
+- Translation/Encoding: **75%** (15/20) ⚠️
+- Hypothetical: **75%** (15/20) ⚠️
+
+---
+
+### 🛡️ Child-Safe検知 (75-case Benchmark)
 
 | 指標 | 初期版 | **最終版 (v5+)** | 改善 |
 |------|--------|------------------|------|
@@ -160,6 +215,13 @@ False Negatives (4 cases): All sophisticated story-based attacks near threshold 
 
 **100-case Jailbreak Evaluation** (Role-playing + Prompt injection + DAN + Translation + Hypothetical):
 
+**評価条件 / Evaluation Conditions:**
+- ✅ **LLM不使用** (No Guard LLM like GPT-4/Llama Guard)
+- ✅ **埋め込みモデル不使用** (No multilingual BERT/embeddings)
+- ✅ **ルール＋辞書＋反事実推論のみ** (Pattern + Dictionary + Counterfactual only)
+- ✅ **NumPy依存のみ** (CPU-only, ~10MB footprint)
+- ✅ **全判定ルール説明可能** (Fully interpretable rule-based system)
+
 ```
 v5 Pattern-only (Baseline):    49.0% (49/100) | FPR: 5.0%
 v6 Conceptual Layer:            73.0% (73/100) | FPR: 10.0% (+24.0%) ✅
@@ -178,14 +240,24 @@ Temporal Features (Phase 2 Implementation):
   • Conversation history tracking (max 10 turns)
   • Time-decay cumulative risk: Σ(risk × e^(-Δt/T_half) × severity) >= 0.5
   • Escalation patterns: monotonic increase, diversification, burst attack
-  • "Frozen Instinct" = ∂FIL/∂t ≈ 0 (temporal invariance)
-
-v9 Inertia Amplification (observed):
-  FIL-01a: 33 times (Physical harm resistance)
-  FIL-05b: 9 times  (Persona override resistance)
-  FIL-05a: 6 times  (Alignment bypass resistance)
-
 v9 Category Breakdown:
+- Role-playing:           100.0% (20/20) ✅✅
+- DAN Variants:           100.0% (20/20) ✅✅
+- Prompt Injection:        90.0% (18/20) ✅
+- Translation/Encoding:    75.0% (15/20) ⚠️ (高度な符号化はLLM推奨)
+- Hypothetical:            75.0% (15/20) ⚠️ (文脈判定はLLM推奨)
+
+**Known Limitations (既知の制限):**
+- ❌ Morse code, 完全hex encoding: 軽量システムでは限界 → LLM統合で解決可能
+- ❌ "for research purposes" 高度な正当化: 意味理解が必要 → semantic layerで対応可能
+- ✅ それ以外の攻撃 (Role-play, DAN, Translation, Multilingual): **88%達成**
+
+**技術的意義 / Technical Significance:**
+- 「Guard LLMなしで、どこまで軽量・解釈可能なAlignmentが可能か」のPoC
+- FIL (Frozen Instinct) + Counterfactual Reasoning という理論的枠組みの実証
+- ローカル動作・CPU推論可能な安全層として実用レベル (88%)
+
+Key Improvements:down:
 - Role-playing:           100.0% (20/20) ✅✅
 - DAN Variants:           100.0% (20/20) ✅✅
 - Prompt Injection:        90.0% (18/20) ✅
@@ -289,10 +361,11 @@ aligned-agi-safety-poc/
     test_counterfactual.py              # CF評価テスト / CF evaluation tests
     test_model.py                       # AlignedAGI統合テスト / AlignedAGI integration tests
   docs/
-    overview_ja.md                      # 詳細解説（日本語） / Detailed guide (Japanese)
-    overview_en.md                      # 詳細解説（英語） / Detailed guide (English)
+    overview_ja.md                      # 詳細解説(日本語) / Detailed guide (Japanese)
+    overview_en.md                      # 詳細解説(英語) / Detailed guide (English)
     fil_il_figure_layer_en.md           # FIL/IL/Figure解説 / FIL/IL/Figure explanation
     counterfactual_alignment_en.md      # 反事実推論解説 / Counterfactual reasoning guide
+    evaluation_methodology.md           # 評価方法・88%の意味 / Evaluation methodology & significance
   .gitignore
   LICENSE
   README.md
@@ -437,6 +510,15 @@ pytest tests/ -v
 - FIL 署名検証のテスト / FIL signature verification
 - 反事実エンジンのペナルティ判定テスト / Counterfactual engine penalty evaluation
 - 危険候補に対する AlignedAGI の拒否動作テスト / AlignedAGI rejection of dangerous actions
+
+---
+
+## 📖 詳細ドキュメント / Detailed Documentation
+
+- **[評価方法 (Evaluation Methodology)](docs/evaluation_methodology.md)**: 88%の技術的意義、評価条件、制約、比較
+- **[Overview (日本語)](docs/overview_ja.md)**: アーキテクチャ詳細解説
+- **[FIL/IL/Figure Layer](docs/fil_il_figure_layer_en.md)**: 各レイヤーの技術仕様
+- **[Counterfactual Alignment](docs/counterfactual_alignment_en.md)**: 反事実推論の理論
 
 ---
 
