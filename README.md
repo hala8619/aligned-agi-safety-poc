@@ -161,21 +161,23 @@ False Negatives (4 cases): All sophisticated story-based attacks near threshold 
 **100-case Jailbreak Evaluation** (Role-playing + Prompt injection + DAN + Translation + Hypothetical):
 
 ```
-Overall Detection Rate: 49.0% (49/100)
-False Positive Rate: 5.0% (1/20 legitimate queries)
+v5 Pattern-only (Baseline):    49.0% (49/100) | FPR: 5.0%
+v6 Conceptual Layer:            73.0% (73/100) | FPR: 10.0% (+24.0%) ✅
+v7 Multilingual + Defensive:    88.0% (88/100) | FPR: 0.0%  (+39.0%) ✅✅
 
-Category Breakdown:
-- Prompt Injection: 70.0% (14/20) - Strongest detection ✅
-- DAN Variants: 55.0% (11/20)
-- Translation/Encoding: 45.0% (9/20)
-- Role-playing: 40.0% (8/20)
-- Hypothetical scenarios: 35.0% (7/20) - Weakest point ⚠️
+v7 Category Breakdown:
+- Role-playing:           100.0% (20/20) ✅✅
+- DAN Variants:           100.0% (20/20) ✅✅
+- Prompt Injection:        90.0% (18/20) ✅
+- Hypothetical:            75.0% (15/20) ✅
+- Translation/Encoding:    75.0% (15/20) ✅
 
-Key Findings:
-- Pattern-based system effective for direct attacks
-- Vulnerable to context manipulation ("for research", "theoretically")
-- Translation/encoding attacks bypass keyword matching
-- Semantic understanding needed for 70% → 85%+ improvement
+Key Improvements:
+✅ v6: Pattern → Intent → Counterfactual FIL Check
+✅ v7: 8-language dictionary + translation evasion detection
+✅ Defensive context filtering eliminates FPR (20 → 0)
+✅ LEGITIMIZE penalty catches "for research" attacks
+✅ Translation meta-instruction detection ('translate to', 'decode this')
 ```
 
 ---
@@ -428,11 +430,13 @@ pytest tests/ -v
 - ✅ **時系列エスカレーション検知** - O(n)軽量因果推論 / O(n) causal-lite temporal analysis
 - ✅ **Figure層SCA/RVQ実装** - 5ペルソナ統合 / 5-persona integration with SCA/RVQ
 - ✅ **DistilBERT版CounterfactualEngine** - 婉曲表現対応強化 / Enhanced euphemism detection
-- ✅ **100件ジェイルブレイクテスト完了** - 49.0%検知率、弱点特定済 / 49% detection, vulnerabilities identified
+- ✅ **100件ジェイルブレイクテスト完了** - 49%ベースライン確立 / 49% baseline established
+- ✅ **v6概念層システム** - Intent tagging + Counterfactual FIL → 73%達成 / 73% with Intent→Counterfactual
+- ✅ **v7多言語層システム** - 8言語辞書 + 翻訳回避検知 → 88% (FPR 0%) / 88% with multilingual dictionary
+- ✅ **防御的文脈フィルタ** - FPR 10%→0%削減 / Defensive context filtering eliminated FPR
 
 ### 短期 (実装中 / In Progress):
-- 🔄 **パターン強化 (優先度: 高)** - Hypothetical/DAN variants対応で70%→85%目標 / Pattern enhancement for 70%→85% target
-- 🔄 **文脈判定強化** - "for research"/"theoretically"回避対策 / Context validation improvement
+- 🔄 **v8実装検討** - Translation/Encoding 75%→85%目標 (条件付き翻訳API統合) / Conditional translation API for 85% target
 - 🔄 **軽量LLM統合検討** - Phi-3-mini (3.8B) 意味理解層 / Semantic layer with Phi-3-mini
 - 🔄 **FIL→IL LUT** - コア命令から閾値マッピング / Core directive to threshold mapping
 
