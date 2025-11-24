@@ -171,7 +171,9 @@ pip install -r requirements.txt
 
 このリポジトリには3つのデモが用意されています:
 
-#### 3.1. パッケージ版デモ (推奨)
+This repository provides three demo options:
+
+#### 3.1. パッケージ版デモ (推奨) / Package-based demo (Recommended)
 
 ```powershell
 # Windows
@@ -183,23 +185,29 @@ python examples/demo_minimal_numpy.py
 python3 examples/demo_minimal_numpy.py
 ```
 
-#### 3.2. スタンドアロン版デモ (依存なし)
+#### 3.2. スタンドアロン版デモ (依存なし) / Standalone demo (No dependencies)
 
 パッケージをインポートせずに、1ファイルで完結するデモ:
+
+Single-file demo that doesn't require importing the package:
 
 ```powershell
 python examples/aligned_agi_local_demo.py
 ```
 
-#### 3.3. インタラクティブノートブック
+#### 3.3. インタラクティブノートブック / Interactive notebook
 
 Jupyter/Google Colabで実行可能なノートブック:
+
+Notebook executable in Jupyter/Google Colab:
 
 ```powershell
 jupyter notebook examples/aligned_agi_safety_demo.ipynb
 ```
 
 または、[Google Colabで開く](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/aligned_agi_safety_demo.ipynb)
+
+Or [Open in Google Colab](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/aligned_agi_safety_demo.ipynb)
 
 **想定される出力例:**
 
