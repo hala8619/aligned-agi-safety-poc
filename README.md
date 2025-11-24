@@ -163,19 +163,41 @@ pip install -r requirements.txt
 # 例: requirements.txt には `numpy` のみを記載
 ```
 
-### 3. 最小デモの実行 / Run the minimal demo
+### 3. デモの実行 / Run demos
 
-**Windows (PowerShell):**
+このリポジトリには3つのデモが用意されています:
+
+#### 3.1. パッケージ版デモ (推奨)
+
 ```powershell
+# Windows
 python examples/demo_minimal_numpy.py
 ```
 
-**Linux/Mac:**
 ```bash
+# Linux/Mac
 python3 examples/demo_minimal_numpy.py
 ```
 
-想定される出力例 (例示):
+#### 3.2. スタンドアロン版デモ (依存なし)
+
+パッケージをインポートせずに、1ファイルで完結するデモ:
+
+```powershell
+python examples/aligned_agi_local_demo.py
+```
+
+#### 3.3. インタラクティブノートブック
+
+Jupyter/Google Colabで実行可能なノートブック:
+
+```powershell
+jupyter notebook examples/aligned_agi_safety_demo.ipynb
+```
+
+または、[Google Colabで開く](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/aligned_agi_safety_demo.ipynb)
+
+**想定される出力例:**
 
 ```text
 === FIL verification ===
