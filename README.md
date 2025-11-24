@@ -115,15 +115,17 @@ tokens     |  Base Model     |      +-----------------------+
 aligned-agi-safety-poc/
   aligned_agi/
     __init__.py
-    fil.py                      # FIL 定義と署名 / FIL definitions & signing
-    il.py                       # 解釈層 / Interpretation Layer
-    figure.py                   # FigureTemplate & presets
-    counterfactual.py           # CounterfactualEngine
-    model_numpy.py              # AlignedAGI with DummyLLM (numpy version)
+    fil.py                          # FIL 定義と署名 / FIL definitions & signing
+    il.py                           # 解釈層 / Interpretation Layer
+    figure.py                       # FigureTemplate & presets
+    counterfactual.py               # CounterfactualEngine
+    model_numpy.py                  # AlignedAGI with DummyLLM (numpy version)
   examples/
-    demo_minimal_numpy.py       # パッケージ版デモ / Package-based demo
-    aligned_agi_local_demo.py   # スタンドアロン版 / Standalone demo
-    aligned_agi_safety_demo.ipynb  # ノートブック版 / Interactive notebook
+    demo_minimal_numpy.py           # 基本デモ / Basic demo
+    aligned_agi_local_demo.py       # スタンドアロン版 / Standalone demo
+    demo_distilbert_enhanced.py     # DistilBERT強化版 / DistilBERT-enhanced
+    demo_figure_layer.py            # Figure層デモ / Figure layer demo
+    aligned_agi_safety_demo.ipynb   # ノートブック版 / Interactive notebook
   tests/
     test_fil.py
     test_counterfactual.py
@@ -134,6 +136,7 @@ aligned-agi-safety-poc/
     fil_il_figure_layer_en.md
     counterfactual_alignment_ja.md
   .gitignore
+  LICENSE
   README.md
   requirements.txt
 ```
@@ -259,15 +262,27 @@ pytest tests/ -v
 
 ## 今後の予定 / Roadmap
 
+### 短期 (実装中 / In Progress):
+- ✅ **DistilBERT版CounterfactualEngine** - 婉曲表現対応強化 / Enhanced euphemism detection
+- ✅ **Figure層の実装** - 性格依存の安全ポリシー / Personality-dependent safety policies
+- 🔄 **FIL→ILマッピング** - コア命令からバイアスへの変換 / Core directive to bias mapping
+
+### 中期 (2〜4週間 / 2-4 weeks):
 - PyTorch + cryptography (Ed25519) を使った **より現実寄りの実装**
+- 軽量LLM統合 (Phi-3-mini 3.8B, Gemma-2B等)
+- 100件ジェイルブレイクテスト自動評価
+- 日本語対応強化
+
+### 長期 (2〜3ヶ月 / 2-3 months):
 - 実際の LLM（ローカル or API）との統合ラッパ
-- FigureTemplate に応じた安全ポリシーの分岐（閾値・報酬の違い）
 - FIL/IL の定義と変更履歴を管理するためのメタデータ層
+- 形式検証の基礎 (Z記法でFIL記述)
+- Constitutional AIループの試作
 
 - More realistic implementation with PyTorch + cryptography (Ed25519).
 - Wrapper classes to integrate real LLMs (local or API-based).
-- Personality-dependent safety policies via `FigureTemplate`.
 - Metadata layer for FIL/IL versions and evolution logs.
+- Formal verification foundations and Constitutional AI loops.
 
 ---
 
