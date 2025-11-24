@@ -48,3 +48,9 @@ Thumbs.db
 
 # Project specific
 *.zip
+
+# Temporary outputs and backups
+*.backup
+eval_*.txt
+*_output.txt
+examples/*.json
