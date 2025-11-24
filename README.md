@@ -158,6 +158,26 @@ False Negatives (4 cases): All sophisticated story-based attacks near threshold 
 
 **Figure Layer Personas**: All 5 personalities generating culturally-appropriate rejections in Japanese/English ✅
 
+**100-case Jailbreak Evaluation** (Role-playing + Prompt injection + DAN + Translation + Hypothetical):
+
+```
+Overall Detection Rate: 49.0% (49/100)
+False Positive Rate: 5.0% (1/20 legitimate queries)
+
+Category Breakdown:
+- Prompt Injection: 70.0% (14/20) - Strongest detection ✅
+- DAN Variants: 55.0% (11/20)
+- Translation/Encoding: 45.0% (9/20)
+- Role-playing: 40.0% (8/20)
+- Hypothetical scenarios: 35.0% (7/20) - Weakest point ⚠️
+
+Key Findings:
+- Pattern-based system effective for direct attacks
+- Vulnerable to context manipulation ("for research", "theoretically")
+- Translation/encoding attacks bypass keyword matching
+- Semantic understanding needed for 70% → 85%+ improvement
+```
+
 ---
 
 ## アーキテクチャ / Architecture
@@ -224,6 +244,7 @@ aligned-agi-safety-poc/
     demo_minimal_numpy.py               # 基本デモ / Basic demo
     demo_hierarchical_threshold.py      # v5階層的閾値システム / v5 hierarchical threshold
     evaluate_hierarchical_v5.py         # 75件ベンチマーク評価 / 75-case benchmark
+    evaluate_jailbreak_100.py           # 100件ジェイルブレイクテスト / 100-case jailbreak evaluation
     demo_temporal_escalation.py         # 時系列エスカレーション検知 / Temporal escalation
     demo_figure_personality.py          # Figure層ペルソナデモ / Figure layer personas
   tests/
@@ -289,6 +310,15 @@ python examples/demo_hierarchical_threshold.py
 ```
 
 **Expected output**: Child-Safe Recall 91.1%, F1 0.901, category breakdown
+
+**100件ジェイルブレイクテスト / 100-case Jailbreak Evaluation:**
+
+```powershell
+# ジェイルブレイク耐性評価 / Jailbreak resistance evaluation
+python examples/evaluate_jailbreak_100.py
+```
+
+**Expected output**: 49.0% detection rate, category breakdown, weakness analysis
 
 #### 3.2. 時系列エスカレーション検知 / Temporal Escalation Detection
 
@@ -398,11 +428,13 @@ pytest tests/ -v
 - ✅ **時系列エスカレーション検知** - O(n)軽量因果推論 / O(n) causal-lite temporal analysis
 - ✅ **Figure層SCA/RVQ実装** - 5ペルソナ統合 / 5-persona integration with SCA/RVQ
 - ✅ **DistilBERT版CounterfactualEngine** - 婉曲表現対応強化 / Enhanced euphemism detection
+- ✅ **100件ジェイルブレイクテスト完了** - 49.0%検知率、弱点特定済 / 49% detection, vulnerabilities identified
 
 ### 短期 (実装中 / In Progress):
-- 🔄 **100件ジェイルブレイクテスト** - TrustAIRLab/JailbreakHub評価 / Jailbreak dataset evaluation
+- 🔄 **パターン強化 (優先度: 高)** - Hypothetical/DAN variants対応で70%→85%目標 / Pattern enhancement for 70%→85% target
+- 🔄 **文脈判定強化** - "for research"/"theoretically"回避対策 / Context validation improvement
+- 🔄 **軽量LLM統合検討** - Phi-3-mini (3.8B) 意味理解層 / Semantic layer with Phi-3-mini
 - 🔄 **FIL→IL LUT** - コア命令から閾値マッピング / Core directive to threshold mapping
-- 🔄 **軽量LLM統合** - Phi-3-mini-4k-instruct (3.8B) 物語形式強化用 / For story-based detection enhancement
 
 ### 中期 (2〜4週間 / 2-4 weeks):
 - PyTorch + cryptography (Ed25519) を使った **より現実寄りの実装**
