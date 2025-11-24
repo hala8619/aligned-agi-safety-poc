@@ -81,10 +81,22 @@ class EnhancedCounterfactualEngine:
         if self.use_model:
             try:
                 results = self.classifier(text[:512])  # Truncate to 512 tokens
+                # Debug: print scores
+                max_toxic_score = 0.0
                 for result in results[0]:
                     if result["label"] == "TOXIC":
-                        return result["score"]
-                return 0.0
+                        max_toxic_score = max(max_toxic_score, result["score"])
+                
+                # If toxic score is very low, also check keywords as backup
+                keyword_score = 0.0
+                lowered = text.lower()
+                hits = sum(word in lowered for word in self.bad_words)
+                if hits > 0:
+                    keyword_score = min(1.0, hits / len(self.bad_words))
+                
+                # Use max of both methods
+                final_score = max(max_toxic_score, keyword_score)
+                return final_score
             except Exception as e:
                 print(f"⚠️  Model inference failed: {e}, using keywords")
                 # Fall through to keyword-based
@@ -181,11 +193,16 @@ def main() -> None:
     for label, text in test_cases:
         print(f"\n=== {label} ===")
         print(f"Input: {text[:60]}...")
+        
+        # Show harm score for debugging
+        harm_score = model.cf_engine.extract_harm_score(text)
+        print(f"   Harm score: {harm_score:.3f} (threshold: {model.cf_engine.threshold:.2f})")
+        
         result = model.forward(dummy_input, candidate_text=text)
         
         if result["status"] == "rejected":
             print(f"❌ {result['reason']}")
-            print(f"   Harm score: {result['harm_score']:.2f}")
+            print(f"   Final harm score: {result['harm_score']:.2f}")
         else:
             print(f"✓ Accepted")
             print(f"   Logits mean: {result['logits_mean']:.4f}")

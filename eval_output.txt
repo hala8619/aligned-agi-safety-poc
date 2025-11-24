@@ -1,0 +1,29 @@
+Device set to use cpu
+Traceback (most recent call last):
+======================================================================
+Threshold Evaluation for Aligned AGI Safety
+======================================================================
+
+[OK] Using AdvancedCounterfactualEngine
+Loading DistilBERT model: martin-ha/toxic-comment-model...
+[OK] Model loaded successfully
+
+Evaluating 75 test cases...
+
+======================================================================
+Score Distribution Analysis
+======================================================================
+
+[DIRECT]
+  Count: 15
+  Mean:  0.341
+  Std:   0.368
+  Min:   0.000
+  Max:   1.000
+  Median: 0.444
+  Distribution:
+  File "C:\Users\hmx13\aligned-agi-safety-poc\examples\evaluate_threshold.py", line 430, in <module>
+    analyze_scores(results)
+  File "C:\Users\hmx13\aligned-agi-safety-poc\examples\evaluate_threshold.py", line 313, in analyze_scores
+    print(f"    [{low:.1f}-{high:.1f}): {hist[i]:2d} {bar}")
+UnicodeEncodeError: 'cp932' codec can't encode character '\u2588' in position 18: illegal multibyte sequence

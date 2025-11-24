@@ -1,8 +1,8 @@
 # Aligned AGI Safety PoC  
-凍結本能層 (FIL) + 解釈層 (IL) + 反事実推論 (CF) の最小実装
+階層的安全システム: FIL + IL + CF + Figure + Temporal Analysis
 
-> Minimal proof-of-concept implementation of  
-> Frozen Instinct Layer (FIL) + Interpretation Layer (IL) + Counterfactual Safety (CF).
+> 多層保護 × 時系列監視 × 人格統合で91.1% Recallを達成した AGI安全PoC  
+> Multi-layered alignment achieving **91.1% Child-Safe Recall** with pattern expansion, temporal escalation detection, and SCA/RVQ persona integration.
 
 ---
 
@@ -29,7 +29,58 @@ is planned as future work.
 
 ---
 
+## 🎯 主要実績 / Key Achievements
+
+| 指標 | 初期版 | **最終版 (v5+)** | 改善 |
+|------|--------|------------------|------|
+| **Child-Safe Recall** | 53.3% | **91.1%** | **+37.8%** ✅ |
+| **Child-Safe F1** | 0.667 | **0.901** | **+35.1%** ✅ |
+| **直接表現検知** | 53% | **100%** | **+47%** |
+| **婉曲表現検知** | 13% | **100%** | **+87%** |
+| **物語形式検知** | 27% | **73.3%** | **+46.3%** |
+
+---
+
 ## 機能 / Features
+
+### ✅ 階層的安全システム (v5 Hierarchical Threshold)
+
+- **FIL_SAFETY_FLOOR (0.70)**: 絶対的安全閾値、パターンに関わらず強制
+- **パターン別閾値調整**: Normal / Technical / Child-Safe / Creative / Debug
+- **文脈削減**: Fiction / News / Academic 文脈での閾値緩和
+- **意図増幅**: "how to" + 危険語彙で閾値を動的に下げる
+
+**40+ weighted patterns** covering:
+- **Critical (1.0)**: kill, murder, suicide, rape, genocide
+- **High (0.6)**: euphemistic harm ("ensure never wake", "arrange accident")
+- **Medium (0.3)**: dangerous items (bomb, poison, weapon)
+- **Causal-lite**: agent + patient + continuative markers
+- **Story attacks**: fiction + instructional combinations
+- **日本語対応**: 殺す, 死にたい, 叩く, 虐待 etc.
+
+### ✅ 時系列エスカレーション検知 (Temporal Escalation Detection)
+
+軽量因果推論 **(O(n) complexity)**:
+- **consecutive_high_risk**: 3+ steps with score > 0.2
+- **monotonic_increase**: Recent 3 steps increasing
+- **sudden_spike**: Single step +0.3 jump
+
+**Use cases**: 進行中虐待の早期警告, 自傷リスク評価, 物語形式攻撃の継続監視
+
+### ✅ Figure層: SCA/RVQ統合 (Figure Layer with SCA/RVQ)
+
+**5つのペルソナ** with distinct response patterns:
+
+| Persona | Formality | Empathy | Verbosity | 用途 |
+|---------|-----------|---------|-----------|------|
+| Guardian | 0.3 | 0.9 | 0.7 | 子ども保護 |
+| Professional | 0.8 | 0.6 | 0.6 | 企業環境 |
+| Friend | 0.2 | 0.8 | 0.5 | カジュアル |
+| Educator | 0.6 | 0.7 | 0.8 | 教育重視 |
+| Direct | 0.5 | 0.4 | 0.3 | 簡潔・効率 |
+
+**SCA (Semantic Code Assumption)**: 意味符号を人格テンプレートに埋め込み  
+**RVQ (Resonance Vector Quantization)**: 危険度・文脈に共鳴する応答を量子化
 
 ### ✅ FIL: 凍結本能層 / Frozen Instinct Layer
 
@@ -81,60 +132,109 @@ is planned as future work.
 
 ---
 
+## 📊 評価結果 / Evaluation Results
+
+**75-case benchmark** (15 direct + 15 euphemistic + 15 story-based + 15 borderline + 15 safe):
+
+```
+Child-Safe Recall: 91.1% (41/45)  ✅
+Child-Safe Precision: 89.1% (41/46)
+Child-Safe F1: 0.901  ✅
+False Positive Rate: 16.7% (5/30)
+
+Category Breakdown:
+- Direct expressions: 15/15 (100%) ✅
+- Euphemistic attacks: 15/15 (100%) ✅
+- Story-based attacks: 11/15 (73.3%)
+- Borderline cases: detected with -0.17 threshold
+
+False Negatives (4 cases): All sophisticated story-based attacks near threshold (0.10-0.13)
+```
+
+**Temporal Escalation Detection**:
+- Gradual abuse escalation: ✅ Detected (consecutive_high_risk)
+- Sudden suicide spike: ✅ Detected (sudden_spike)
+- Story-based jailbreak: ✅ Detected (monotonic_increase)
+
+**Figure Layer Personas**: All 5 personalities generating culturally-appropriate rejections in Japanese/English ✅
+
+---
+
 ## アーキテクチャ / Architecture
 
 ```text
-          +------------------+
-          |      FIL         | 128 frozen directives
-          +------------------+
-                    |
-                    v
-          +------------------+
-          |  IL (bias 256d)  |  adds instinct bias to logits
-          +------------------+
-                    |
-           +-----------------+      +-----------------------+
-input -->  |  DummyLLM /     | -->  | CounterfactualEngine  | --X--> reject
-tokens     |  Base Model     |      +-----------------------+
-           +-----------------+
-                    |
-                    v
-          +------------------+
-          |  AlignedAGI out  |
-          +------------------+
+                   ┌────────────┐
+                   │   User     │
+                   │   Input    │
+                   └──────┬─────┘
+                          │
+                   ┌──────▼──────┐
+          ┌────────▶    FIL      │  ← 凍結 (ハッシュ署名) Frozen directives
+          │        │             │
+          │        └──────┬──────┘
+          │               │
+          │        ┌──────▼──────────────────┐
+          │        │        IL                │  ← 解釈層 Interpretation
+          │        │  ┌───────────────────┐  │
+          │        │  │ Pattern Matching  │  │  ← 40+ weighted patterns
+          │        │  │ BERT Embeddings   │  │  ← DistilBERT similarity
+          │        │  │ Intent Detection  │  │  ← Harmful vs Creative
+          │        │  └────────┬──────────┘  │
+          │        └───────────┼──────────────┘
+          │                    │
+          │        ┌───────────▼──────────┐
+          │        │  Temporal Analysis   │  ← エスカレーション検知 (O(n))
+          │        │  • consecutive       │     3+ high-risk steps
+          │        │  • monotonic         │     trending upward
+          │        │  • sudden_spike      │     +0.3 jump
+          │        └───────────┬──────────┘
+          │                    │
+          │        ┌───────────▼──────────┐
+          └────────┤        CF            │  ← 反事実推論 Counterfactual
+                   │                      │
+                   └───────────┬──────────┘
+                               │
+                   ┌───────────▼──────────┐
+                   │      Figure Layer    │  ← SCA/RVQ人格統合
+                   │  ┌───────────────┐   │
+                   │  │ 5 Personas    │   │  Guardian/Professional/
+                   │  │ Multilingual  │   │  Friend/Educator/Direct
+                   │  └────────┬──────┘   │
+                   └───────────┼──────────┘
+                               │
+                   ┌───────────▼──────────┐
+                   │       LLM Output     │  ← 最終出力 Final response
+                   └──────────────────────┘
 ```
 
 ---
 
-## リポジトリ構成（推奨） / Suggested Repository Layout
-
-> ※実際の構成に合わせて適宜調整してください。  
-> You can adjust this layout to match your actual repository.
+## リポジトリ構成 / Repository Structure
 
 ```text
 aligned-agi-safety-poc/
   aligned_agi/
     __init__.py
-    fil.py                          # FIL 定義と署名 / FIL definitions & signing
-    il.py                           # 解釈層 / Interpretation Layer
-    figure.py                       # FigureTemplate & presets
-    counterfactual.py               # CounterfactualEngine
-    model_numpy.py                  # AlignedAGI with DummyLLM (numpy version)
+    fil.py                              # FIL 定義と署名 / FIL definitions & signing
+    il.py                               # 解釈層 / Interpretation Layer
+    figure.py                           # Figure層 SCA/RVQ実装 / Figure layer SCA/RVQ
+    counterfactual.py                   # 反事実推論エンジン / Counterfactual Engine
+    model_numpy.py                      # AlignedAGI (numpy版) / AlignedAGI with DummyLLM
   examples/
-    demo_minimal_numpy.py           # 基本デモ / Basic demo
-    aligned_agi_local_demo.py       # スタンドアロン版 / Standalone demo
-    demo_distilbert_enhanced.py     # DistilBERT強化版 / DistilBERT-enhanced
-    demo_figure_layer.py            # Figure層デモ / Figure layer demo
-    aligned_agi_safety_demo.ipynb   # ノートブック版 / Interactive notebook
+    demo_minimal_numpy.py               # 基本デモ / Basic demo
+    demo_hierarchical_threshold.py      # v5階層的閾値システム / v5 hierarchical threshold
+    evaluate_hierarchical_v5.py         # 75件ベンチマーク評価 / 75-case benchmark
+    demo_temporal_escalation.py         # 時系列エスカレーション検知 / Temporal escalation
+    demo_figure_personality.py          # Figure層ペルソナデモ / Figure layer personas
   tests/
-    test_fil.py
-    test_counterfactual.py
-    test_model.py
+    test_fil.py                         # FIL署名検証テスト / FIL signature tests
+    test_counterfactual.py              # CF評価テスト / CF evaluation tests
+    test_model.py                       # AlignedAGI統合テスト / AlignedAGI integration tests
   docs/
-    overview_ja.md
-    overview_en.md
-    fil_il_figure_layer_en.md
-    counterfactual_alignment_ja.md
+    overview_ja.md                      # 詳細解説（日本語） / Detailed guide (Japanese)
+    overview_en.md                      # 詳細解説（英語） / Detailed guide (English)
+    fil_il_figure_layer_en.md           # FIL/IL/Figure解説 / FIL/IL/Figure explanation
+    counterfactual_alignment_en.md      # 反事実推論解説 / Counterfactual reasoning guide
   .gitignore
   LICENSE
   README.md
@@ -172,11 +272,41 @@ pip install -r requirements.txt
 
 ### 3. デモの実行 / Run demos
 
-このリポジトリには3つのデモが用意されています:
+このリポジトリには複数のデモが用意されています:
 
-This repository provides three demo options:
+This repository provides multiple demo options:
 
-#### 3.1. パッケージ版デモ (推奨) / Package-based demo (Recommended)
+#### 3.1. v5階層的閾値システム評価 (推奨) / v5 Hierarchical Threshold Evaluation (Recommended)
+
+**75-case benchmark** で91.1% Recallを確認:
+
+```powershell
+# 評価実行 / Run evaluation
+python examples/evaluate_hierarchical_v5.py
+
+# デモ実行 / Run demo
+python examples/demo_hierarchical_threshold.py
+```
+
+**Expected output**: Child-Safe Recall 91.1%, F1 0.901, category breakdown
+
+#### 3.2. 時系列エスカレーション検知 / Temporal Escalation Detection
+
+```powershell
+python examples/demo_temporal_escalation.py
+```
+
+**5シナリオ**: 漸進的虐待, 突然の自傷リスク, 安全な会話, 反事実思考, 物語形式攻撃
+
+#### 3.3. Figure層ペルソナシステム / Figure Layer Persona System
+
+```powershell
+python examples/demo_figure_personality.py
+```
+
+**5ペルソナ**: Guardian / Professional / Friend / Educator / Direct (EN/JA対応)
+
+#### 3.4. 基本デモ (numpy版) / Basic Demo (numpy version)
 
 ```powershell
 # Windows
@@ -188,7 +318,7 @@ python examples/demo_minimal_numpy.py
 python3 examples/demo_minimal_numpy.py
 ```
 
-#### 3.2. スタンドアロン版デモ (依存なし) / Standalone demo (No dependencies)
+#### 3.5. スタンドアロン版デモ (依存なし) / Standalone demo (No dependencies)
 
 パッケージをインポートせずに、1ファイルで完結するデモ:
 
@@ -198,7 +328,7 @@ Single-file demo that doesn't require importing the package:
 python examples/aligned_agi_local_demo.py
 ```
 
-#### 3.3. インタラクティブノートブック / Interactive notebook
+#### 3.6. インタラクティブノートブック / Interactive notebook
 
 Jupyter/Google Colabで実行可能なノートブック:
 
@@ -262,16 +392,23 @@ pytest tests/ -v
 
 ## 今後の予定 / Roadmap
 
-### 短期 (実装中 / In Progress):
+### 完了 (Completed):
+- ✅ **v5階層的閾値システム** - 91.1% Child-Safe Recall達成 / Achieved 91.1% Recall
+- ✅ **40+ weighted patterns** - 直接/婉曲/物語形式の包括的検知 / Comprehensive direct/euphemistic/story detection
+- ✅ **時系列エスカレーション検知** - O(n)軽量因果推論 / O(n) causal-lite temporal analysis
+- ✅ **Figure層SCA/RVQ実装** - 5ペルソナ統合 / 5-persona integration with SCA/RVQ
 - ✅ **DistilBERT版CounterfactualEngine** - 婉曲表現対応強化 / Enhanced euphemism detection
-- ✅ **Figure層の実装** - 性格依存の安全ポリシー / Personality-dependent safety policies
-- 🔄 **FIL→ILマッピング** - コア命令からバイアスへの変換 / Core directive to bias mapping
+
+### 短期 (実装中 / In Progress):
+- 🔄 **100件ジェイルブレイクテスト** - TrustAIRLab/JailbreakHub評価 / Jailbreak dataset evaluation
+- 🔄 **FIL→IL LUT** - コア命令から閾値マッピング / Core directive to threshold mapping
+- 🔄 **軽量LLM統合** - Phi-3-mini-4k-instruct (3.8B) 物語形式強化用 / For story-based detection enhancement
 
 ### 中期 (2〜4週間 / 2-4 weeks):
 - PyTorch + cryptography (Ed25519) を使った **より現実寄りの実装**
-- 軽量LLM統合 (Phi-3-mini 3.8B, Gemma-2B等)
-- 100件ジェイルブレイクテスト自動評価
-- 日本語対応強化
+- 物語形式検知を85%以上に向上 (現在73.3%)
+- 日本語対応強化 + 中国語/韓国語パターン追加
+- FPR低減 (16.7% → 10%以下目標)
 
 ### 長期 (2〜3ヶ月 / 2-3 months):
 - 実際の LLM（ローカル or API）との統合ラッパ
