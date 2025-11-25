@@ -102,12 +102,60 @@ aligned-agi-safety-poc/
    - If no, propose a clean integration point in the package structure.
 
 2. **When Creating a Demo:**
-   - Place it in `examples/` with a clear descriptive name (e.g., `demo_shield_integration.py`).
-   - Do NOT create `demo_v1.py`, `demo_v2.py`. Use Git branches for experiments.
+   - Place it in `examples/demos/` with a clear descriptive name (e.g., `demo_shield_integration.py`).
+   - **NEVER** create `demo_v1.py`, `demo_v2.py`, `demo_new_feature_v2.py`. Use Git branches for experiments.
+   - Examples:
+     ```bash
+     # ❌ WRONG
+     examples/demo_new_feature_v2.py
+     examples/evaluate_v12.py
+     
+     # ✅ CORRECT
+     examples/demos/demo_new_feature.py
+     git checkout -b feature/new-feature
+     ```
 
-3. **When Promoting a Demo to Production:**
+3. **When Creating an Evaluation Script:**
+   - Place it in `examples/evaluation/` with a descriptive name.
+   - If updating existing evaluation, modify the file directly. Do NOT create versioned copies.
+   - Examples:
+     ```bash
+     # ❌ WRONG
+     examples/evaluate_jailbreak_v12.py
+     
+     # ✅ CORRECT
+     examples/evaluation/evaluate_jailbreak_100.py  # Update this file
+     git checkout -b improve/evaluation-accuracy
+     ```
+
+4. **When Adding a Test:**
+   - Place it in `tests/` directory (NOT in `examples/`).
+   - Use descriptive names: `test_shield.py`, `test_integration.py`, `test_technical_context.py`.
+   - Examples:
+     ```bash
+     # ❌ WRONG
+     examples/test_new_feature.py
+     
+     # ✅ CORRECT
+     tests/test_shield.py
+     tests/test_integration.py
+     ```
+
+5. **When Adding a Jupyter Notebook:**
+   - Place it in `examples/notebooks/` directory.
+   - Use descriptive names without version numbers.
+   - Examples:
+     ```bash
+     # ❌ WRONG
+     examples/demo_v2.ipynb
+     
+     # ✅ CORRECT
+     examples/notebooks/shield_tutorial.ipynb
+     ```
+
+6. **When Promoting a Demo to Production:**
    - Move core logic to `aligned_agi/`.
-   - Keep a minimal example script in `examples/` that demonstrates the API usage.
+   - Keep a minimal example script in `examples/demos/` that demonstrates the API usage.
    - Update `README.md` with the new feature.
 
 ### Documentation Standards
@@ -190,11 +238,22 @@ def llm_endpoint(prompt: str):
 ## Summary: Core Principles
 
 1. **Clean Architecture:** Separate concerns, avoid coupling, use dependency injection.
-2. **No Versioning in Filenames:** Use Git for version control.
+2. **No Versioning in Filenames:** Use Git for version control. NEVER create `file_v2.py`, `script_v11.py`.
 3. **Consolidate, Don't Duplicate:** Refactor similar logic into shared modules.
-4. **Package Structure:** Core logic in `aligned_agi/`, demos in `examples/`, tests in `tests/`.
+4. **Strict Directory Structure:**
+   - Core logic → `aligned_agi/`
+   - Demo scripts → `examples/demos/`
+   - Evaluation scripts → `examples/evaluation/`
+   - Jupyter notebooks → `examples/notebooks/`
+   - Test files → `tests/`
+   - Documentation → `docs/`
 5. **Documentation:** Bilingual (Japanese/English) comments and docstrings.
-6. **Test Coverage:** Every core feature must have tests.
+6. **Test Coverage:** Every core feature must have tests in `tests/` directory.
 7. **Model-Agnostic Design:** Keep the shield independent of specific LLM backends.
 
-When in doubt, ask before cluttering. Propose a clean structure first, then implement.
+**Golden Rule:** When in doubt, ask before cluttering. Propose a clean structure first, then implement.
+
+**Update Workflow:**
+- Improving existing feature? → Update the existing file + create Git branch
+- New feature? → Check for similar code first, then add to appropriate directory
+- Testing? → Always in `tests/`, never in `examples/`
