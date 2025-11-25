@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Figure Personality Demo - SCA/RVQ Integration
+Figure Personality Demo - Persona Integration
 
 Figure層のペルソナ別応答生成デモ
 時系列エスカレーション検知との統合

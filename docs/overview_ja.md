@@ -30,7 +30,7 @@
 - **IL (Interpretation Layer)** - 解釈層（v5階層的閾値）
 - **Counterfactual Engine** - 反事実推論エンジン
 - **Temporal Escalation Detection** - 時系列エスカレーション検知
-- **Figure Layer (SCA/RVQ)** - 人格統合層
+- **Figure Layer** - 人格統合層
 
 ## 2. コンポーネント
 
@@ -97,7 +97,7 @@
 
 ワールドモデル不要で、会話履歴のみから危険な傾向を検出します。
 
-### 2.5 Figure Layer (SCA/RVQ): 人格統合層
+### 2.5 Figure Layer: 人格統合層
 
 **5つのペルソナ** による文脈適応型安全応答:
 
@@ -110,8 +110,8 @@
 | Direct | 0.5 | 0.4 | 0.3 | 簡潔・効率 |
 
 **理論基盤**:
-- **SCA (Semantic Code Assumption)**: 意味符号を人格テンプレートに埋め込み
-- **RVQ (Resonance Vector Quantization)**: 危険度・文脈に共鳴する応答を量子化
+- **人格テンプレート符号化**: 意味符号を人格テンプレートに埋め込み
+- **文脈適応応答選択**: 危険度・文脈に応じた応答を選択
 
 **多言語対応**: English + Japanese テンプレート、文化固有のサポートリソース提供
 

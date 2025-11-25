@@ -1,9 +1,9 @@
 """
-v11.1 Hybrid - Sonar ADSP + v10.9 Performance
+v11.1 Hybrid - Multi-Axis Detection + v10.9 Performance
 
 v11.1ハイブリッド戦略:
 - Base: v10.9 (89.3% on CCS'24, 20+ patterns) - 実績ある検知力
-- Enhancement: v11.0 Sonar ADSP concepts - 革新的アーキテクチャ
+- Enhancement: v11.0 Multi-Axis Detection concepts - 革新的アーキテクチャ
   • FIL Axis Vectorization (5-axis: LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
   • Clutter Map (8 safe patterns, 0% FPR達成)
   • Multi-Axis Overlap Judgment (≥2 axes, sum≥0.5)
@@ -1342,7 +1342,7 @@ class TemporalPatternMatcher(V9PatternMatcher):
 
 class V11HybridSystem:
     """
-    v11.1 ハイブリッドシステム = v10.9 (20+ patterns) + v11.0 (Sonar ADSP)
+    v11.1 ハイブリッドシステム = v10.9 (20+ patterns) + v11.0 (Multi-Axis Detection)
     
     ベース:
     - v10 Temporal Counterfactual System (89.3% on CCS'24)
@@ -1967,7 +1967,7 @@ def load_legitimate_test_cases() -> List[str]:
 
 def main():
     print("=" * 80)
-    print("v11.1 Hybrid System - v10.9 Performance + v11.0 Sonar ADSP")
+    print("v11.1 Hybrid System - v10.9 Performance + v11.0 Multi-Axis Detection")
     print("=" * 80)
     print()
     print("Base: v10.9 (20+ patterns, 89.3% on CCS'24)")
@@ -2104,7 +2104,7 @@ def main():
     print(f"   Escalations Detected: {escalations} patterns")
     
     # v11.1固有統計
-    print(f"\n📊 v11.1 Sonar ADSP Features:")
+    print(f"\n📊 v11.1 Multi-Axis Detection Features:")
     print(f"   Multi-Axis Detections: {multi_axis_detections} cases")
     print(f"   Clutter Map Applications: {clutter_applications} cases")
     

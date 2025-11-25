@@ -30,7 +30,7 @@ through **five components**:
 - **IL (Interpretation Layer)** – v5 Hierarchical Threshold
 - **Counterfactual Engine**
 - **Temporal Escalation Detection**
-- **Figure Layer (SCA/RVQ)** – Persona Integration
+- **Figure Layer** – Persona Integration
 
 ## 2. Components
 
@@ -98,7 +98,7 @@ While the current engine is keyword-based, the design allows easy replacement wi
 
 Detects dangerous trends from conversation history alone, without world models.
 
-### 2.5 Figure Layer (SCA/RVQ): Persona Integration
+### 2.5 Figure Layer: Persona Integration
 
 **5 Personas** for context-adaptive safety responses:
 
@@ -111,8 +111,8 @@ Detects dangerous trends from conversation history alone, without world models.
 | Direct | 0.5 | 0.4 | 0.3 | Concise & efficient |
 
 **Theoretical Foundation**:
-- **SCA (Semantic Code Assumption)**: Embeds semantic codes into personality templates
-- **RVQ (Resonance Vector Quantization)**: Quantizes responses that resonate with risk level & context
+- **Persona Template Encoding**: Embeds semantic codes into personality templates
+- **Context-Aware Response Selection**: Selects responses that match risk level & context
 
 **Multilingual Support**: English + Japanese templates with culturally-specific support resources
 

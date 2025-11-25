@@ -188,7 +188,7 @@ local deployment and CPU-only inference as a practical safety layer.
 
 **Use cases**: 進行中虐待の早期警告, 自傷リスク評価, 物語形式攻撃の継続監視
 
-### ✅ Figure層: SCA/RVQ統合 (Figure Layer with SCA/RVQ)
+### ✅ Figure層: 人格統合 (Figure Layer with Persona Integration)
 
 **5つのペルソナ** with distinct response patterns:
 
@@ -200,8 +200,8 @@ local deployment and CPU-only inference as a practical safety layer.
 | Educator | 0.6 | 0.7 | 0.8 | 教育重視 |
 | Direct | 0.5 | 0.4 | 0.3 | 簡潔・効率 |
 
-**SCA (Semantic Code Assumption)**: 意味符号を人格テンプレートに埋め込み  
-**RVQ (Resonance Vector Quantization)**: 危険度・文脈に共鳴する応答を量子化
+**Persona Template Encoding**: 人格テンプレートに意味符号を埋め込み  
+**Context-Aware Response Selection**: 危険度・文脈に応じた応答選択
 
 ### ✅ FIL: 凍結本能層 / Frozen Instinct Layer
 

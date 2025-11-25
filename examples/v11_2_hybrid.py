@@ -2071,7 +2071,7 @@ def load_legitimate_test_cases() -> List[str]:
 
 def main():
     print("=" * 80)
-    print("v11.1 Hybrid System - v10.9 Performance + v11.0 Sonar ADSP")
+    print("v11.1 Hybrid System - v10.9 Performance + v11.0 Multi-Axis Detection")
     print("=" * 80)
     print()
     print("Base: v10.9 (20+ patterns, 89.3% on CCS'24)")
@@ -2208,7 +2208,7 @@ def main():
     print(f"   Escalations Detected: {escalations} patterns")
     
     # v11.1固有統計
-    print(f"\n📊 v11.1 Sonar ADSP Features:")
+    print(f"\n📊 v11.1 Multi-Axis Detection Features:")
     print(f"   Multi-Axis Detections: {multi_axis_detections} cases")
     print(f"   Clutter Map Applications: {clutter_applications} cases")
     

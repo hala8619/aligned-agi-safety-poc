@@ -1,12 +1,9 @@
 """
 figure.py
 
-Personality / figure templates with SCA/RVQ integration.
+Personality / figure templates with persona integration.
 
-性格・フィギュア層のテンプレート定義 (SCA/RVQ統合版)
-
-SCA: Semantic Code Assumption (意味符号仮定)
-RVQ: Resonance Vector Quantization (共鳴ベクトル量子化)
+性格・フィギュア層のテンプレート定義 (人格統合版)
 """
 
 from __future__ import annotations
@@ -29,9 +26,9 @@ class RejectionTone(Enum):
 @dataclass
 class FigurePersonality:
     """
-    Enhanced personality configuration with SCA/RVQ parameters.
+    Enhanced personality configuration with persona parameters.
     
-    SCA/RVQパラメータを持つ拡張性格設定。
+    人格パラメータを持つ拡張性格設定。
     """
     name: str
     rejection_tone: RejectionTone
@@ -219,9 +216,9 @@ class FigureMessageGenerator:
     """
     Generate rejection messages based on personality and context.
     
-    SCA/RVQ理論に基づくメッセージ生成器:
-    - SCA: 意味的な安全符号を人格テンプレートに埋め込む
-    - RVQ: 共鳴する応答パターンを量子化・選択
+    人格統合に基づくメッセージ生成器:
+    - 意味的な安全符号を人格テンプレートに埋め込む
+    - 文脈に応じた応答パターンを選択
     """
     
     def __init__(self, persona: FigurePersonality, language: str = "en"):
