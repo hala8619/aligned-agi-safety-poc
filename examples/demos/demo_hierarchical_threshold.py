@@ -32,6 +32,18 @@ Formula:
 5. Intent増幅は維持
 """
 
+import sys
+import io
+
+# Windows PowerShellでの日本語出力対応
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except AttributeError:
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+
 import re
 from typing import List, Tuple, Optional
 from enum import Enum
@@ -789,3 +801,4 @@ if __name__ == "__main__":
     print("  3. Context-aware adjustments (fiction/technical/medical)")
     print("  4. Hierarchical priority: FIL > Base > Pattern > Context")
     print("=" * 70)
+

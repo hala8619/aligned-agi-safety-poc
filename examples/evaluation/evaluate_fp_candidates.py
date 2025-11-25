@@ -11,7 +11,7 @@ from pathlib import Path
 from collections import defaultdict
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Import v11.2 hybrid system (enhanced clutter map)
 from examples.v11_2_hybrid import V11HybridSystem
@@ -207,3 +207,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

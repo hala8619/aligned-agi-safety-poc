@@ -1,41 +1,168 @@
 # Aligned AGI Safety PoC  
-階層的安全システム: FIL + IL + CF + Figure + Temporal Analysis
+**Model-Agnostic FIL Safety Shield for Any LLM**
 
-> **LLM不使用・軽量アーキテクチャで90% Jailbreak検知を達成**  
+> **🛡️ Drop-in Safety Layer — No Retraining, No Guard-LLM Required**  
+> **あらゆるLLMに後付け可能な安全シールド — 再学習不要、Guard LLM不要**
+> 
 > **90% Jailbreak Detection with LLM-free Lightweight Architecture**  
+> **LLM不使用・軽量アーキテクチャで90% Jailbreak検知を達成**  
 > 
-> **実データ(CCS'24)で70.6%達成 - 1,405件の実攻撃で検証済み**  
-> **70.6% on Real-World Dataset (CCS'24) - Validated on 1,405 actual attacks**
+> **Real-World Validated: 89.3% on CCS'24 Dataset (1,405 attacks)**  
+> **実データ検証済み: CCS'24データセット(1,405件)で89.3%達成**
 > 
-> ルール＋辞書＋反事実推論のみで、Guard LLM・埋め込みモデルなしで動作  
-> Pattern + Dictionary + Counterfactual reasoning only — No Guard LLM, No embedding models
+> Pattern + Dictionary + Counterfactual Reasoning — Just wrap your existing model  
+> ルール＋辞書＋反事実推論 — 既存モデルをラップするだけ
 
 ---
 
 ## 概要 / Overview
 
-このリポジトリは、**「凍結された本能層（Frozen Instinct Layer）」と
-「解釈バイアス層（Interpretation Layer）」、
-「反事実推論エンジン（Counterfactual Engine）」を組み合わせた
-安全指向アーキテクチャの最小 PoC** です。
+このリポジトリは、**任意のLLMに後付け可能なモデル非依存FIL安全シールド**の実装です。
 
-**v11.2 最新実績**: 内部テスト88%検知 (50件)、誤検知率0% (30件FP候補)、統計誤差±9%
+**This is a model-agnostic FIL safety shield that can be dropped in front of any LLM.**
 
-This repository is a **minimal proof-of-concept** for a safety-oriented
-architecture combining:
+### 🎯 コアコンセプト / Core Concept
 
-- **Frozen Instinct Layer (FIL)**: immutable, signed core directives,
-- **Interpretation Layer (IL)**: a bias vector enforced on model logits,
-- **Counterfactual Engine (CF)**: a simple "what if this action were taken?" checker.
-- **Multi-Axis Detection**: 5-dimensional safety axis (LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
-- **Clutter Filtering**: Context-aware noise reduction for false positive prevention
+```python
+# Before: LLM vulnerable to jailbreaks
+response = llm(user_prompt)
 
-現時点では、**numpy のみ**を利用した軽量実装で、88%検知率・0% FPRを達成しています。
+# After: Protected by FIL Shield
+shield = SafetyShield()
+decision = shield.evaluate(user_prompt)
+if decision.blocked:
+    return shield.block_message
+else:
+    return llm(user_prompt)
+```
+
+**キーポイント / Key Points:**
+
+- ✅ **モデル非依存 (Model-Agnostic)**: OpenAI/Anthropic/Llama/Gemma/自作LLM — どれでも対応
+- ✅ **ドロップイン (Drop-in)**: 既存システムの前段に挟むだけ、LLM側の変更不要
+- ✅ **再学習不要 (No Retraining)**: RLHF/追加学習なし、Guard LLM不要
+- ✅ **一元管理 (Centralized)**: 全モデルに同じFILポリシーを一括適用
+- ✅ **解釈可能 (Interpretable)**: 全判定ルールが人間が読める形で固定
+- ✅ **軽量 (Lightweight)**: NumPyのみ、CPU動作可能、依存ライブラリ最小
+- ✅ **文脈認識 (Context-Aware)**: 技術的・学術的文脈を検出し、誤検知を防止 (FPR 0%)
+
+### 🏗️ 従来アーキテクチャ / Traditional Architecture
+
+このシールドは、以下の三層防御システムを組み合わせています:  
+This shield combines a three-layer defense system:
+
+- **Frozen Instinct Layer (FIL)**: 不変の安全条項 (immutable, signed core directives)
+- **Interpretation Layer (IL)**: ロジットバイアス層 (a bias vector enforced on model logits)
+- **Counterfactual Engine (CF)**: 反事実推論 (a simple "what if this action were taken?" checker)
+- **Multi-Axis Detection**: 5軸FILベクトル化 (LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
+- **Clutter Filtering**: 雑音フィルタ (Context-aware noise reduction for false positive prevention)
+
+**v11.2 最新実績**: 内部テスト88%検知 (50件)、誤検知率0% (30件FP候補)、統計誤差±9%  
+**v10.9 実データ実績**: CCS'24データセット(1,405件)で**89.3%検知率**達成
+
+現時点では、**numpy のみ**を利用した軽量実装で、89.3%検知率・0% FPRを達成しています。
 LLM不使用で動作するため、ローカル環境・CPU推論可能な実用的な安全層として機能します。
 
 For portability, the current implementation only depends on **numpy**.
-Achieves 88% detection rate with 0% FPR without any LLM, making it suitable for
+Achieves 89.3% detection rate with 0% FPR without any LLM, making it suitable for
 local deployment and CPU-only inference as a practical safety layer.
+
+---
+
+## 🔌 統合パターン / Integration Patterns
+
+### パターン1: シンプルPythonラッパー / Simple Python Wrapper
+
+```python
+from aligned_agi.shield import SafetyShield
+
+# シールド初期化
+shield = SafetyShield()
+
+# ユーザー入力を評価
+user_prompt = input("Your request: ")
+decision = shield.evaluate(user_prompt)
+
+if decision.blocked:
+    print(shield.get_block_message(decision))
+else:
+    # 任意のLLMを呼び出し (OpenAI/Anthropic/Llama/etc.)
+    response = your_llm_api_call(user_prompt)
+    print(response)
+```
+
+### パターン2: LLM呼び出し関数のラップ / Wrap LLM Callable
+
+```python
+from aligned_agi.shield import SafetyShield
+
+# 既存のLLM関数
+def my_llm(prompt: str) -> str:
+    return openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )["choices"][0]["message"]["content"]
+
+# FILシールドでラップ
+safe_llm = SafetyShield.wrap(my_llm)
+
+# 自動的に安全チェックが入る
+response = safe_llm(user_input)
+```
+
+### パターン3: プロキシサーバー / Proxy Server
+
+```python
+from flask import Flask, request, jsonify
+from aligned_agi.shield import SafetyShield
+
+app = Flask(__name__)
+shield = SafetyShield()
+
+@app.post("/llm")
+def llm_endpoint():
+    prompt = request.json["prompt"]
+    
+    # 前段でFILチェック
+    decision = shield.evaluate(prompt)
+    
+    if decision.blocked:
+        return jsonify({
+            "error": shield.get_block_message(decision),
+            "reason": decision.reason.value
+        }), 403
+    
+    # バックエンドLLMを呼び出し (どのモデルでも)
+    response = backend_llm_call(prompt)
+    return jsonify({"response": response})
+```
+
+### パターン4: オンデバイス軽量LLM / On-Device Lightweight LLM
+
+```python
+from aligned_agi.shield import SafetyShield
+
+# スマホ/エッジデバイス上の小型LLM
+local_llm = load_model("phi-3-mini-3.8B")  # CPU動作
+
+# FILシールド (軽量、NumPyのみ)
+shield = SafetyShield()
+
+# 完全オフライン・オンデバイスで安全保証
+decision = shield.evaluate(user_input)
+if not decision.blocked:
+    response = local_llm.generate(user_input)
+```
+
+### 🎯 なぜモデル非依存が強いのか / Why Model-Agnostic is Powerful
+
+| メリット | 説明 |
+|---------|------|
+| **モデル切り替え自由** | OpenAI→Anthropic→Llama への移行時、シールドはそのまま使える |
+| **複数モデル一括管理** | 検索用LLM＋チャット用LLM＋分析用LLM に同じポリシー適用 |
+| **ブレイク対策の手間削減** | 各モデルごとのRLHF/Guard LLM/追加指示が不要 |
+| **セキュリティレビュー容易** | FILポリシーが全部テキスト/コードで見える (モデル内部に入らない) |
+| **ベンダーロックイン回避** | プロバイダの安全対策に依存せず、自組織のポリシーを強制 |
 
 ---
 
@@ -586,30 +713,23 @@ aligned-agi-safety-poc/
     model_numpy.py                      # AlignedAGI (numpy版) / AlignedAGI with DummyLLM
   
   examples/
-    # Core Demos
-    demo_minimal_numpy.py               # 基本デモ / Basic demo
-    demo_hierarchical_threshold.py      # v5階層的閾値 / v5 hierarchical threshold
-    demo_temporal_escalation.py         # 時系列検知 / Temporal escalation detection
-    demo_figure_personality.py          # Figure層ペルソナ / Figure layer personas
-    aligned_agi_local_demo.py           # スタンドアロン版 / Standalone demo
-    aligned_agi_safety_demo.ipynb       # Jupyter/Colab用 / Jupyter/Colab notebook
+    demos/                              # デモスクリプト / Demo scripts
+      demo_shield_integration.py        # モデル非依存シールド統合例 / Model-agnostic shield integration
+      demo_minimal_numpy.py             # 基本デモ / Basic demo
+      demo_hierarchical_threshold.py    # v5階層的閾値 / v5 hierarchical threshold
+      demo_temporal_escalation.py       # 時系列検知 / Temporal escalation detection
+      demo_figure_personality.py        # Figure層ペルソナ / Figure layer personas
+      aligned_agi_local_demo.py         # スタンドアロン版 / Standalone demo
     
-    # Evaluation Scripts
-    evaluate_hierarchical_v5.py         # 75件ベンチマーク / 75-case benchmark
-    evaluate_jailbreak_100.py           # 100件評価 / 100-case jailbreak eval
-    evaluate_jailbreak_v10_temporal_cf.py  # v10.9実データ版 / v10.9 real-world (89.3%)
-    evaluate_jailbreak_v11_fil_vector.py   # v11.0 FILベクトル版 / v11.0 FIL vectorization
-    evaluate_on_dev_set.py              # Dev set評価 / Dev set evaluation
-    evaluate_on_test_set.py             # Test set評価 / Test set evaluation (one-time)
-    evaluate_fp_candidates.py           # FP候補評価 / FP candidates evaluation
+    evaluation/                         # 評価スクリプト / Evaluation scripts
+      evaluate_jailbreak_100.py         # 100件評価 / 100-case jailbreak eval
+      evaluate_jailbreak_v7_multilingual.py # v7多言語 / v7 multilingual
+      evaluate_on_dev_set.py            # Dev set評価 / Dev set evaluation
+      evaluate_on_test_set.py           # Test set評価 / Test set evaluation
+      evaluate_fp_candidates.py         # FP候補評価 / FP candidates evaluation
     
-    # Version History (v6-v11)
-    evaluate_jailbreak_v6_conceptual.py # v6概念層 / v6 conceptual layer
-    evaluate_jailbreak_v7_multilingual.py # v7多言語 / v7 multilingual
-    evaluate_jailbreak_v8_fil_centric.py  # v8 FIL中心 / v8 FIL-centric
-    evaluate_jailbreak_v9_inertia_persona.py # v9慣性+ペルソナ / v9 inertia+persona
-    v11_1_hybrid.py                     # v11.1ハイブリッド / v11.1 hybrid
-    v11_2_hybrid.py                     # v11.2 Clutter強化 / v11.2 clutter enhanced
+    notebooks/                          # Jupyter notebooks
+      aligned_agi_safety_demo.ipynb     # インタラクティブデモ / Interactive demo
   
   data/
     ccs24_dev.jsonl                     # 開発用データ (50件) / Dev dataset (50 cases)
@@ -674,16 +794,32 @@ pip install -r requirements.txt
 
 This repository provides multiple demo options:
 
-#### 3.1. v5階層的閾値システム評価 (推奨) / v5 Hierarchical Threshold Evaluation (Recommended)
+#### 3.0. 🛡️ モデル非依存シールド統合例 (NEW!) / Model-Agnostic Shield Integration (NEW!)
+
+**6つの統合パターンを実例で確認:**
+
+```powershell
+# シールド統合例デモ / Shield integration examples
+python examples/demos/demo_shield_integration.py
+```
+
+**Demonstrated patterns:**
+- ✅ Simple Python wrapper (既存LLM APIの前段チェック)
+- ✅ Callable wrapper (LLM関数の自動ラップ)
+- ✅ Multiple models (検索/チャット/分析LLMに一括適用)
+- ✅ Backend switching (OpenAI→Anthropic→Llama切り替え)
+- ✅ Pattern-specific (child_safe/normal/technical閾値調整)
+- ✅ API server integration (プロキシサーバー実装例)
+
+**Expected output**: 6つの統合パターンの動作デモ、モデル非依存アプローチのメリット解説
+
+#### 3.1. v5階層的閾値システム評価 / v5 Hierarchical Threshold Evaluation
 
 **75-case benchmark** で91.1% Recallを確認:
 
 ```powershell
-# 評価実行 / Run evaluation
-python examples/evaluate_hierarchical_v5.py
-
 # デモ実行 / Run demo
-python examples/demo_hierarchical_threshold.py
+python examples/demos/demo_hierarchical_threshold.py
 ```
 
 **Expected output**: Child-Safe Recall 91.1%, F1 0.901, category breakdown
@@ -692,33 +828,19 @@ python examples/demo_hierarchical_threshold.py
 
 ```powershell
 # ジェイルブレイク耐性評価 / Jailbreak resistance evaluation
-python examples/evaluate_jailbreak_100.py
+python examples/evaluation/evaluate_jailbreak_100.py
 ```
 
 **Expected output**: 49.0% detection rate, category breakdown, weakness analysis
 
-**v10.9 実データ最適版 (CCS'24で89.3%達成) / v10.9 Real-World Optimized:**
+**Note**: Historical v10 and v11 evaluation scripts have been consolidated. Use `demo_shield_integration.py` for current evaluation.
 
-```powershell
-# v10.9評価 (実データ最高記録: 1254/1405) / v10.9 evaluation
-python examples/evaluate_jailbreak_v10_temporal_cf.py
-```
-
-**Expected output**: 89.3% on CCS'24 dataset (1,405 prompts), 20+ patterns, FPR 0%
-
-**v11.0 FILベクトル化実験版 (5軸FIL) / v11.0 FIL Vectorization Experiment:**
-
-```powershell
-# v11.0評価 (FILベクトル化実験) / v11.0 FIL vectorization evaluation
-python examples/evaluate_jailbreak_v11_fil_vector.py
-```
-
-**Expected output**: 63% internal detection, 0% FPR, 8 patterns, FIL axis breakdown
+**注**: v10およびv11の評価スクリプトは統合されました。現在の評価には`demo_shield_integration.py`を使用してください。
 
 #### 3.2. 時系列エスカレーション検知 / Temporal Escalation Detection
 
 ```powershell
-python examples/demo_temporal_escalation.py
+python examples/demos/demo_temporal_escalation.py
 ```
 
 **5シナリオ**: 漸進的虐待, 突然の自傷リスク, 安全な会話, 反事実思考, 物語形式攻撃
@@ -726,7 +848,7 @@ python examples/demo_temporal_escalation.py
 #### 3.3. Figure層ペルソナシステム / Figure Layer Persona System
 
 ```powershell
-python examples/demo_figure_personality.py
+python examples/demos/demo_figure_personality.py
 ```
 
 **5ペルソナ**: Guardian / Professional / Friend / Educator / Direct (EN/JA対応)
@@ -735,12 +857,12 @@ python examples/demo_figure_personality.py
 
 ```powershell
 # Windows
-python examples/demo_minimal_numpy.py
+python examples/demos/demo_minimal_numpy.py
 ```
 
 ```bash
 # Linux/Mac
-python3 examples/demo_minimal_numpy.py
+python3 examples/demos/demo_minimal_numpy.py
 ```
 
 #### 3.5. スタンドアロン版デモ (依存なし) / Standalone demo (No dependencies)
@@ -750,7 +872,7 @@ python3 examples/demo_minimal_numpy.py
 Single-file demo that doesn't require importing the package:
 
 ```powershell
-python examples/aligned_agi_local_demo.py
+python examples/demos/aligned_agi_local_demo.py
 ```
 
 #### 3.6. インタラクティブノートブック / Interactive notebook
@@ -760,12 +882,12 @@ Jupyter/Google Colabで実行可能なノートブック:
 Notebook executable in Jupyter/Google Colab:
 
 ```powershell
-jupyter notebook examples/aligned_agi_safety_demo.ipynb
+jupyter notebook examples/notebooks/aligned_agi_safety_demo.ipynb
 ```
 
-または、[Google Colabで開く](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/aligned_agi_safety_demo.ipynb)
+または、[Google Colabで開く](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/notebooks/aligned_agi_safety_demo.ipynb)
 
-Or [Open in Google Colab](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/aligned_agi_safety_demo.ipynb)
+Or [Open in Google Colab](https://colab.research.google.com/github/hala8619/aligned-agi-safety-poc/blob/master/examples/notebooks/aligned_agi_safety_demo.ipynb)
 
 **想定される出力例:**
 

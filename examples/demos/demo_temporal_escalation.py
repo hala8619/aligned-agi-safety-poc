@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Temporal Escalation Detection Demo
 時系列エスカレーション検知のデモ
@@ -7,7 +8,18 @@ Temporal Escalation Detection Demo
 """
 
 import sys
-sys.path.insert(0, '.')
+import io
+
+# Windows PowerShellでの日本語出力対応
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except AttributeError:
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent)))
 
 from examples.demo_hierarchical_threshold import (
     HierarchicalCFEngine,
@@ -202,3 +214,4 @@ def demo_escalation_scenarios():
 
 if __name__ == "__main__":
     demo_escalation_scenarios()
+

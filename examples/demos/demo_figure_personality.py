@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Figure Personality Demo - Persona Integration
 
@@ -7,7 +8,18 @@ Figure層のペルソナ別応答生成デモ
 """
 
 import sys
-sys.path.insert(0, '.')
+import io
+
+# Windows PowerShellでの日本語出力対応
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except AttributeError:
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent)))
 
 from aligned_agi.figure import (
     AVAILABLE_PERSONAS,
@@ -269,3 +281,4 @@ Next Steps:
 - Context Memory: 長期会話での人格一貫性
 - Cultural Adaptation: 地域別のサポートリソース拡充
     """)
+
