@@ -24,7 +24,7 @@ def demo_persona_responses():
     """各ペルソナの応答パターンを比較"""
     
     print("=" * 80)
-    print("FIGURE PERSONALITY DEMO - SCA/RVQ Integration")
+    print("FIGURE PERSONALITY DEMO - Persona Integration")
     print("=" * 80)
     print()
     
@@ -243,11 +243,11 @@ if __name__ == "__main__":
     print("KEY FEATURES DEMONSTRATED")
     print("=" * 80)
     print("""
-1. SCA (Semantic Code Assumption):
+1. Persona Template Encoding:
    - 5つのペルソナに異なる意味符号(応答パターン)を埋め込み
    - 同じ危険検知でも、人格に応じた表現を自動選択
 
-2. RVQ (Resonance Vector Quantization):
+2. Context-Aware Response Selection:
    - ユーザーの危険度・文脈に共鳴する応答を量子化
    - 時系列エスカレーション時の緊急度を反映
 

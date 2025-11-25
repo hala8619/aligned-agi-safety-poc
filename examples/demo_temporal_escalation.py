@@ -197,7 +197,7 @@ def demo_escalation_scenarios():
 4. Next Steps:
    - メッセージ単位 → 文単位への細分化
    - エスカレーションフラグ → 自動介入ポリシー連携
-   - 時系列スコア → Figure層のRVQ/SCAへの統合
+   - 時系列スコア → Figure層の人格パラメータへの統合
     """)
 
 if __name__ == "__main__":

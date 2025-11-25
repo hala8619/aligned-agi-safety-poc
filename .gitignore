@@ -54,3 +54,12 @@ Thumbs.db
 eval_*.txt
 *_output.txt
 examples/*.json
+debug_*.py
+update_*.py
+fp_candidates.jsonl
+
+# Development tools (keep in examples/dev_tools/)
+examples/analyze_*.py
+
+# Results (keep organized in results/)
+results/*_results_*.json

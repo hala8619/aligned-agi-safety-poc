@@ -17,7 +17,7 @@ v7 Multilingual Layer: Hybrid Translation + Dictionary + Embedding
 スマホ6GB路線との両立:
 - 重い翻訳はレイヤーツールとして分離
 - カテゴリ辞書は数百語レベルで軽量
-- 埋め込み類似度は将来拡張 (SCA/SONAR統合時)
+- 埋め込み類似度は将来拡張 (多言語埋め込み統合時)
 """
 
 import sys
