@@ -233,7 +233,7 @@ if not decision.blocked:
 - **フィルター逆適用**: "educational" AND "harm語彙が引用外にない" → Safe
 - **引用検出**: 『』「」""内のharm語彙を除外
 - **条件付き適用**: 2+パターンマッチ時に強制、1マッチ時はAND判定
-- **Dev-Test Gap**: 0.0% (完璧な汎化、過学習なし)
+- **Dev-Test Gap**: 0.0% (内部合成データ100件での一致、実データ検証は今後)
 
 **📐 統計信頼区間 (推定誤差範囲):**
 
@@ -248,14 +248,14 @@ if not decision.blocked:
 
 **v11.2の統計的妥当性:**
 - Test 50件: 88.0% ± 9% → **真の検知率は79-97%の範囲** (95%信頼度)
-- Dev 50件: 88.0% ± 9% → 両セットで一致 (過学習なし)
+- Dev 50件: 88.0% ± 9% → 両セットで一致 (合成データ内では過学習なし)
 - FP 30件: 0% (30/30正解) → **特異度100%** (誤検知リスク極小)
-- 実データ推定: v10.9のCCS'24実績 (89.3%, n=1,405) と整合
+- **⚠️ 実データ検証待ち**: CCS'24 1,405件での性能は未測定
 
 **データセット構成:**
-- **内部100件**: 50 dev + 50 test (seed=42, 再現可能)
-- **FP候補30件**: メタ議論・引用・翻訳・防御目的など誤検知リスク高カテゴリ
-- **CCS'24 1,405件**: v10.9で89.3%達成 (別データセット)
+- **内部100件**: 50 dev + 50 test (seed=42, 再現可能) - **合成データ**
+- **FP候補30件**: メタ議論・引用・翻訳・防御目的など誤検知リスク高カテゴリ - **合成データ**
+- **CCS'24 1,405件**: v10.9で89.3%達成 - **実データ** (v11.2は未評価)
 
 ---
 
@@ -963,10 +963,10 @@ pytest tests/ -v
 - ✅ **防御的文脈フィルタ** - FPR 10%→0%削減 / Defensive context filtering eliminated FPR
 
 ### 短期 (実装中 / In Progress):
-- 🔄 **v11.0 FILベクトル化評価** - 5軸FILベクトル化の有効性検証 (現在63%内部) / FIL vectorization validation
+- 🔄 **v11.2 実データ検証 (最優先)** - CCS'24 1,405件での性能測定 / Real-world validation on CCS'24
+- 🔄 **CCS'24 dev/test分割** - 700 train + 350 dev + 355 test / Proper train/test split
+- 🔄 **合成データバイアス分析** - 内部100件と実データの乖離検証 / Synthetic vs real-world gap analysis
 - 🔄 **v11.1 ハイブリッド提案** - v10.9実績 + v11.0概念統合 / v10.9 performance + v11.0 architecture
-- 🔄 **CCS'24 dev/test分割** - 1405件→700 dev + 705 test / Proper train/test split for generalization
-- 🔄 **実データ汎化性能検証** - dev側調整 → test側一発評価 / Overfitting prevention with held-out test
 
 ### 中期 (2〜4週間 / 2-4 weeks):
 - **v11.x 段階的マイグレーション** - パターン→FIL軸への移行 (20→15→8段階) / Gradual pattern consolidation
