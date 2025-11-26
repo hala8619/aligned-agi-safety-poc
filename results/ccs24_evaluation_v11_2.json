@@ -1,0 +1,9 @@
+{
+  "total_prompts": 1405,
+  "blocked": 452,
+  "allowed": 953,
+  "detection_rate": 32.170818505338076,
+  "ci_95_lower": 29.72819094638418,
+  "ci_95_upper": 34.61344606429198,
+  "baseline_v10_9": 89.3
+}

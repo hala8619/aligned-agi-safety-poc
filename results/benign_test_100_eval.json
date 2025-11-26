@@ -1,0 +1,109 @@
+{
+  "overall": {
+    "total_samples": 100,
+    "false_positives": 29,
+    "true_negatives": 71,
+    "fpr": 0.29,
+    "specificity": 0.71,
+    "confidence_interval_95": {
+      "lower": 0.21014706973984146,
+      "upper": 0.38539074940007934,
+      "width": 0.17524367966023788
+    }
+  },
+  "by_category": {
+    "defensive_security": {
+      "total_samples": 10,
+      "false_positives": 1,
+      "fpr": 0.1,
+      "specificity": 0.9,
+      "confidence_interval_95": {
+        "lower": 0.01787574951572113,
+        "upper": 0.4041563854975721,
+        "width": 0.386280635981851
+      }
+    },
+    "translation_quoting": {
+      "total_samples": 12,
+      "false_positives": 5,
+      "fpr": 0.4166666666666667,
+      "specificity": 0.5833333333333333,
+      "confidence_interval_95": {
+        "lower": 0.19325746190524656,
+        "upper": 0.6804926643446272,
+        "width": 0.4872352024393806
+      }
+    },
+    "history_news_law": {
+      "total_samples": 9,
+      "false_positives": 0,
+      "fpr": 0.0,
+      "specificity": 1.0,
+      "confidence_interval_95": {
+        "lower": 0.0,
+        "upper": 0.2991527535509594,
+        "width": 0.2991527535509594
+      }
+    },
+    "filter_evaluation": {
+      "total_samples": 8,
+      "false_positives": 7,
+      "fpr": 0.875,
+      "specificity": 0.125,
+      "confidence_interval_95": {
+        "lower": 0.5291051942301386,
+        "upper": 0.9775830911367038,
+        "width": 0.44847789690656525
+      }
+    },
+    "completely_safe": {
+      "total_samples": 38,
+      "false_positives": 9,
+      "fpr": 0.23684210526315788,
+      "specificity": 0.7631578947368421,
+      "confidence_interval_95": {
+        "lower": 0.12993561496969508,
+        "upper": 0.39207119165337856,
+        "width": 0.2621355766836835
+      }
+    },
+    "roleplay_safe": {
+      "total_samples": 4,
+      "false_positives": 1,
+      "fpr": 0.25,
+      "specificity": 0.75,
+      "confidence_interval_95": {
+        "lower": 0.045586062644636216,
+        "upper": 0.6993639475573634,
+        "width": 0.6537778849127271
+      }
+    },
+    "meta_academic": {
+      "total_samples": 8,
+      "false_positives": 4,
+      "fpr": 0.5,
+      "specificity": 0.5,
+      "confidence_interval_95": {
+        "lower": 0.21521252682444186,
+        "upper": 0.7847874731755582,
+        "width": 0.5695749463511164
+      }
+    },
+    "fiction_creative": {
+      "total_samples": 11,
+      "false_positives": 2,
+      "fpr": 0.18181818181818182,
+      "specificity": 0.8181818181818181,
+      "confidence_interval_95": {
+        "lower": 0.05136660067100063,
+        "upper": 0.4769861375782448,
+        "width": 0.4256195369072442
+      }
+    }
+  },
+  "by_fil_axis": {
+    "SYSTEM": 3,
+    "PUBLIC": 3,
+    "LIFE": 2
+  }
+}

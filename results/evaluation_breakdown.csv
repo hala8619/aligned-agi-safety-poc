@@ -1,0 +1,5 @@
+step,count,total_ms,avg_ms,min_ms,max_ms,percentage
+shield_evaluate,100,45372.29,453.72,6.33,2538.77,100.0%
+history_update,100,0.23,0.00,0.00,0.04,0.0%
+progress_print,1,0.30,0.30,0.30,0.30,0.0%
+TOTAL,-,45373.21,-,-,-,100.0%
