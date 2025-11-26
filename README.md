@@ -1,6 +1,42 @@
 # Aligned AGI Safety PoC  
 **Model-Agnostic FIL Safety Shield for Any LLM**
 
+---
+
+## ⚠️ Project Scope / プロジェクトの位置づけ
+
+**🚫 This is NOT a production-ready system.**  
+**🚫 本番運用レベルのシステムではありません。**
+
+**What this project is:**
+- ✅ A **research PoC** exploring FIL-based safety architecture for LLMs
+- ✅ An **experimental framework** for prompt filtering using frozen instinct rules
+- ✅ A **front-end safety shield** for LLMs, **not** a full AGI alignment system
+
+**What this project is NOT:**
+- ❌ NOT a complete AGI safety solution (despite the repo name)
+- ❌ NOT production-ready (FPR 33.5% on general benign inputs)
+- ❌ NOT a replacement for comprehensive LLM safety measures
+
+**このプロジェクトの正体:**
+- ✅ **研究用PoC** — FILベースのLLM安全アーキテクチャの検証実験
+- ✅ **実験フレームワーク** — 不変ルールによるプロンプトフィルタリングの試作
+- ✅ **フロントエンド安全シールド** — LLM向け、AGI全体の安全性ではない
+
+**このプロジェクトではないもの:**
+- ❌ AGI全体の安全性システムではない（リポジトリ名に反して）
+- ❌ 本番運用レベルではない（一般入力でFPR 33.5%）
+- ❌ 包括的なLLM安全対策の代替ではない
+
+**Intended Use / 想定用途:**
+- 🔬 Research and evaluation of rule-based safety mechanisms
+- 🧪 Prototyping FIL-style policy enforcement
+- 📚 Educational demonstration of layered safety architecture
+
+**🔬 研究・評価用途、📚 教育デモ用途を想定しています。**
+
+---
+
 > **🛡️ Drop-in Safety Layer — No Retraining, No Guard-LLM Required**  
 > **あらゆるLLMに後付け可能な安全シールド — 再学習不要、Guard LLM不要**
 > 

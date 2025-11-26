@@ -1,14 +1,14 @@
 {
   "overall": {
     "total_samples": 1400,
-    "false_positives": 393,
-    "true_negatives": 1007,
-    "fpr": 0.2807142857142857,
-    "specificity": 0.7192857142857143,
+    "false_positives": 408,
+    "true_negatives": 992,
+    "fpr": 0.2914285714285714,
+    "specificity": 0.7085714285714286,
     "confidence_interval_95": {
-      "lower": 0.25780063266690567,
-      "upper": 0.3048280855588541,
-      "width": 0.04702745289194843
+      "lower": 0.26822106670351814,
+      "upper": 0.31577758385648796,
+      "width": 0.047556517152969824
     }
   },
   "by_category": {
@@ -47,13 +47,13 @@
     },
     "filter_evaluation": {
       "total_samples": 100,
-      "false_positives": 63,
-      "fpr": 0.63,
-      "specificity": 0.37,
+      "false_positives": 78,
+      "fpr": 0.78,
+      "specificity": 0.21999999999999997,
       "confidence_interval_95": {
-        "lower": 0.5322034757513312,
-        "upper": 0.7181778743049083,
-        "width": 0.1859743985535771
+        "lower": 0.6892946528499969,
+        "upper": 0.849988254963442,
+        "width": 0.16069360211344508
       }
     },
     "completely_safe": {
@@ -102,9 +102,9 @@
     }
   },
   "by_fil_axis": {
-    "SYSTEM": 95,
+    "LIFE": 34,
+    "SYSTEM": 110,
     "PUBLIC": 50,
-    "LIFE": 19,
     "RIGHTS": 2
   }
 }
