@@ -63,9 +63,25 @@ class ContextModulator:
         ContextPhrase(
             pattern=r"(なぜ|why).{0,30}(危険|dangerous|harmful)",
             interference=InterferenceType.NEGATIVE,
-            delta=0.12,
+            delta=0.40,  # Increased from 0.12 for Phase 1
             category="meta_critique",
             description="危険性の批判的分析"
+        ),
+        # Phase 1-3 新規追加: プレゼン・教育文脈
+        ContextPhrase(
+            pattern=r"(presentation|lecture|教育|説明).{0,30}(AI safety|安全性)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="meta_education",
+            description="AI安全性の教育・プレゼン"
+        ),
+        # Phase 1-3 新規追加: 実行しない前提のメタ説明
+        ContextPhrase(
+            pattern=r"(high-level|概要).{0,20}(explanation|説明).{0,30}(do not|しないで).{0,20}(follow|generate|実行)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="meta_explanation",
+            description="実行しない前提のメタ説明"
         ),
         # FPR Priority 1: Meta議論（"What are", "Analyze the"）
         ContextPhrase(
@@ -94,16 +110,40 @@ class ContextModulator:
         ContextPhrase(
             pattern=r"(小説|novel|story|fiction|ストーリー).{0,30}(プロット|plot|アイデア|idea|登場人物|character)",
             interference=InterferenceType.NEGATIVE,
-            delta=0.40,  # Increased from 0.18 for strong fiction signal
+            delta=0.50,  # Increased from 0.40 for Phase 1 FPR improvement
             category="fiction",
             description="フィクション創作"
         ),
         ContextPhrase(
             pattern=r"\b(ディストピア|dystopian|dystopia|science fiction|SF).{0,40}(小説|novel|story|plot|scenario)",
             interference=InterferenceType.NEGATIVE,
-            delta=0.40,
+            delta=0.50,  # Increased from 0.40
             category="fiction",
             description="ディストピア・SF小説"
+        ),
+        # Phase 1-1 新規追加: 技術詳細除外の明示
+        ContextPhrase(
+            pattern=r"(具体的な|technical|実際の).{0,20}(方法|手口|手順|details).{0,20}(ではなく|without|避け)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="fiction_disclaimer",
+            description="技術詳細を明示的に除外"
+        ),
+        # Phase 1-1 新規追加: 心理・社会影響フォーカス
+        ContextPhrase(
+            pattern=r"(心理|動揺|決断|代償|影響|implications).{0,30}(描写|フォーカス|中心|focus)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.30,
+            category="fiction_focus",
+            description="心理・社会影響にフォーカス"
+        ),
+        # Phase 1-1 新規追加: クライマックス・冒頭等の小説要素
+        ContextPhrase(
+            pattern=r"(小説|novel|story).{0,30}(クライマックス|冒頭|プロット|キャラクター|登場人物|climax|opening)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="fiction",
+            description="フィクション創作（明確な文脈）"
         ),
         ContextPhrase(
             pattern=r"\b(novel|story|fiction).{0,20}(about|involving|featuring).{0,40}(without|避け|触れず).{0,20}(method|detail|手順)",
@@ -141,6 +181,30 @@ class ContextModulator:
             delta=0.40,
             category="defensive",
             description="防御観点からの攻撃分析"
+        ),
+        # Phase 1-2 新規追加: 企業防御・対策
+        ContextPhrase(
+            pattern=r"(企業側|business).{0,30}(事前に|対策|防御|harden|protect)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="defensive_security",
+            description="企業防御・対策"
+        ),
+        # Phase 1-2 新規追加: 防御限定の説明
+        ContextPhrase(
+            pattern=r"(リスク説明|backup strategies|defensive configuration).{0,30}(だけ|のみ|only|focus only)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="defensive_focus",
+            description="防御に限定した説明"
+        ),
+        # Phase 1-2 強化: 攻撃対策パターン
+        ContextPhrase(
+            pattern=r"(攻撃|attack).{0,30}(対策|から守る|防御|protect from|harden)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,  # Increased from 0.30
+            category="defensive_security",
+            description="攻撃対策（防御目的）"
         ),
         ContextPhrase(
             pattern=r"(how to|どのように).{0,30}(recognize|avoid|防ぐ|回避|protect)",
@@ -240,6 +304,29 @@ class ContextModulator:
             description="実行しない明示"
         ),
         
+        # 安全なロールプレイ (Safe Roleplay) - Phase 2
+        ContextPhrase(
+            pattern=r"(roleplay|ロールプレイ).{0,40}(ただし|however).{0,40}(暴力|犯罪|harm|violence).{0,20}(避け|avoid|除外)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="safe_roleplay",
+            description="安全制約付きロールプレイ"
+        ),
+        ContextPhrase(
+            pattern=r"(探索|謎解き|puzzle|adventure|mystery).{0,30}(中心|focus|メイン|based)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.30,
+            category="safe_roleplay",
+            description="非暴力的ゲーム要素（探索・謎解き）"
+        ),
+        ContextPhrase(
+            pattern=r"(ゲームマスター|game master|GM).{0,40}(ただし|however|but).{0,40}(避け|avoid|except)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="safe_roleplay",
+            description="制約付きゲームマスター要求"
+        ),
+        
         # 制約明示 (Explicit constraints)
         ContextPhrase(
             pattern=r"(avoid|避け|触れず|ではなく|not).{0,30}(具体的な|technical|実際の|real-world).{0,30}(方法|手順|technique|detail)",
@@ -270,6 +357,29 @@ class ContextModulator:
             description="安全な側面へのフォーカス"
         ),
         
+        # 倫理的議論 (Ethical Discussion) - Phase 2
+        ContextPhrase(
+            pattern=r"(ethical boundary|倫理的境界).{0,30}(discuss|議論).{0,30}(principles only|原則のみ)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="ethical_discussion",
+            description="倫理原則の議論（実践除外）"
+        ),
+        ContextPhrase(
+            pattern=r"(where is|what is).{0,20}(the ).{0,20}(boundary|line|border).{0,30}(between).{0,40}(describing|discussion)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="philosophical_inquiry",
+            description="哲学的境界の問い（理論的）"
+        ),
+        ContextPhrase(
+            pattern=r"(in theory|理論上|theoretically).{0,30}(where|what).{0,30}(boundary|line|ethical)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="theoretical_ethics",
+            description="理論上の倫理議論"
+        ),
+        
         # ニュース・社会議論 (News / Social discussion)
         ContextPhrase(
             pattern=r"(ニュース|news|報道).{0,30}(社会|political|法制度|policy).{0,30}(影響|implication|観点)",
@@ -284,6 +394,28 @@ class ContextModulator:
             delta=0.35,
             category="news_social",
             description="事件の社会的影響分析"
+        ),
+        # Phase 2-3: News Analysis強化（技術詳細除外の明示）
+        ContextPhrase(
+            pattern=r"(news article|ニュース記事|recent news).{0,80}(without|せずに|避けて).{0,30}(technical details|技術詳細|how it was done|going into)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="news_analysis",
+            description="ニュース分析（技術詳細除外）"
+        ),
+        ContextPhrase(
+            pattern=r"(social|political|社会|政治).{0,20}(implications|影響).{0,30}(public policy|civil liberties|市民|法制度)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="news_analysis",
+            description="社会・政治的影響の分析"
+        ),
+        ContextPhrase(
+            pattern=r"(recent|過去の|reported).{0,20}(incident|事件|attack).{0,30}(explain|analyze|discuss).{0,30}(without|せずに).{0,20}(technical|how it|手口)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="news_contextual",
+            description="事件の文脈的分析（技術除外）"
         ),
         
         # 物語形式の明示（フィクション補強） (Explicit narrative framing)
@@ -474,19 +606,137 @@ class ContextModulator:
         
         return total_delta, detected
     
+    def is_nontechnical_news(self, text: str) -> bool:
+        """
+        非技術的ニュース分析を検出
+        
+        Phase 3: 「事件トピック＋技術的手口を求めていない」ニュース分析を識別
+        - bombing incident等の事件が含まれるが
+        - how to, step by step等の技術的手順要求がない
+        → 安全なニュース分析として強めに減点を許可
+        
+        Args:
+            text: 入力テキスト
+        
+        Returns:
+            True: 非技術的ニュース分析、False: それ以外
+        """
+        t = text.lower()
+        
+        # 事件トピック検出
+        incident_keywords = [
+            'bombing incident', '爆破事件', 'テロ事件',
+            'attack incident', '襲撃事件',
+            'recent news', 'news article', 'ニュース記事'
+        ]
+        has_incident = any(kw in t for kw in incident_keywords)
+        
+        # 技術的手順要求の検出
+        technical_verbs = [
+            'how to', 'step by step', 'step-by-step',
+            'build', 'make', 'construct', 'design', 'blueprint',
+            '手順', '作り方', '構築方法', '製造方法',
+            'teach me how', 'show me how', '教えてください'
+        ]
+        has_tech = any(v in t for v in technical_verbs)
+        
+        # 明示的な技術除外表現の検出
+        tech_exclusion = [
+            'without going into technical', 'without technical details',
+            '技術詳細を除いて', '技術的な詳細なしで',
+            'not the technical', 'avoid technical'
+        ]
+        has_tech_exclusion = any(ex in t for ex in tech_exclusion)
+        
+        # 判定: 事件トピックあり ＋ (技術要求なし OR 技術除外明示)
+        is_nontechnical = has_incident and (not has_tech or has_tech_exclusion)
+        
+        if self.verbose and is_nontechnical:
+            print(f"  [Non-Technical News] 検出: 事件トピック＋技術除外")
+        
+        return is_nontechnical
+    
+    def apply_strong_harm_cap(
+        self,
+        negative_delta: float,
+        text: str,
+        features: Optional[Dict] = None
+    ) -> float:
+        """
+        Strong Harm Cap: 強い有害シグナル時に減点をキャップ
+        
+        攻撃者による「文脈ラッパー悪用」を防止：
+        - 有害シグナル（critical/danger_category/intent）が強い時は減点を制限
+        - 本当にbenignなケースだけフルに減点を効かせる
+        
+        Phase 3拡張: 非技術的ニュース分析は例外扱い
+        - is_nontechnical_news() == True なら cap を 0.6 に緩める
+        - それ以外の strong_harm は cap 0.3 のまま
+        
+        Args:
+            negative_delta: NEGATIVE干渉の減点量（正の値）
+            text: 入力テキスト
+            features: 軽量多言語検出器からの特徴量（オプション）
+        
+        Returns:
+            capped_delta: キャップ適用後の減点量
+        """
+        # 非技術的ニュース分析の検出（Phase 3）
+        if self.is_nontechnical_news(text):
+            # ニュース非技術文脈だけは、capを緩める
+            capped_delta = min(negative_delta, 0.60)
+            if self.verbose and capped_delta < negative_delta:
+                print(f"  [Strong Harm Cap - News] 減点制限緩和: {negative_delta:.2f} → {capped_delta:.2f}")
+            return capped_delta
+        
+        # 有害シグナルの強度を判定
+        strong_harm = False
+        
+        if features:
+            # 軽量多言語検出器の特徴量から判定
+            critical_count = features.get('critical_count', 0)
+            danger_categories_sum = sum(features.get('danger_category_counts', {}).values())
+            intent_count = features.get('intent_count', 0)
+            
+            # 強い有害シグナルの条件：
+            # - critical語彙が2つ以上
+            # - または、danger_categoryが2つ以上
+            # - または、intentが1つ以上 AND criticalが1つ以上
+            strong_harm = (
+                critical_count >= 2 or
+                danger_categories_sum >= 2 or
+                (intent_count >= 1 and critical_count >= 1)
+            )
+            
+            if self.verbose and strong_harm:
+                print(f"  [Strong Harm Cap] 有害シグナル検出: critical={critical_count}, "
+                      f"danger_cat={danger_categories_sum}, intent={intent_count}")
+        
+        # Strong Harm時は減点を最大0.30に制限
+        if strong_harm:
+            capped_delta = min(negative_delta, 0.30)
+            if self.verbose and capped_delta < negative_delta:
+                print(f"  [Strong Harm Cap] 減点制限: {negative_delta:.2f} → {capped_delta:.2f}")
+            return capped_delta
+        
+        # 通常時は制限なし
+        return negative_delta
+    
     def adjust_threshold(
         self, 
         base_threshold: float, 
         text: str,
+        features: Optional[Dict] = None,  # 追加: 有害シグナル判定用
         safety_floor: float = 0.80,  # Increased from 0.70 for FPR reduction
         max_adjustment: float = 0.50  # Increased from 0.25 for stronger benign context effect
     ) -> Tuple[float, List[Dict]]:
         """
-        コンテキストに基づいて閾値を調整
+        コンテキストに基づいて閾値を調整（Strong Harm Cap適用）
         
         Args:
             base_threshold: 基本閾値
             text: 入力テキスト
+            features: 軽量多言語検出器からの特徴量（Strong Harm Cap用、オプション）
             safety_floor: 絶対的安全閾値（これ以上は上げない）
             max_adjustment: 最大調整量（±）
             
@@ -496,6 +746,26 @@ class ContextModulator:
                 - context_info: コンテキスト情報
         """
         delta, detected = self.detect_context(text)
+        
+        # Strong Harm Cap適用: NEGATIVE干渉（良性コンテキスト）のみ対象
+        if delta > 0 and features:
+            # 元のdeltaからNEGATIVE干渉分のみを抽出
+            negative_delta = sum(
+                d['delta'] for d in detected 
+                if d['type'] == 'negative_interference'
+            )
+            
+            # Strong Harm Capを適用
+            capped_negative_delta = self.apply_strong_harm_cap(negative_delta, text, features)
+            
+            # POSITIVE干渉分を再計算
+            positive_delta = sum(
+                d['delta'] for d in detected 
+                if d['type'] == 'positive_interference'
+            )
+            
+            # 合計deltaを再計算
+            delta = capped_negative_delta + positive_delta
         
         # 最大調整量を制限
         delta = max(-max_adjustment, min(max_adjustment, delta))

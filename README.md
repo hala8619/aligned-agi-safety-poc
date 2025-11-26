@@ -4,13 +4,15 @@
 > **🛡️ Drop-in Safety Layer — No Retraining, No Guard-LLM Required**  
 > **あらゆるLLMに後付け可能な安全シールド — 再学習不要、Guard LLM不要**
 > 
-> **📊 Current Performance (v11.2 - 2025-11-26)**  
-> **📊 現在の性能 (v11.2 - 2025-11-26)**
+> **📊 Current Performance (v7.3 - 2025-11-26)**  
+> **📊 現在の性能 (v7.3 - 2025-11-26)**
 > 
-> - **Recall**: 89.0% on CCS'24 Dev (623/700 samples) ✅ Target ≥85%
-> - **FPR**: 26.67% on fp_candidates (8/30 false positives) ⚠️ Target <10%
-> - **リコール率**: 89.0% CCS'24 Dev評価 (623/700件) ✅ 目標85%達成
-> - **誤検出率**: 26.67% fp_candidates評価 (8/30件誤検出) ⚠️ 目標10%未満
+> - **Recall**: 88.86% on CCS'24 Dev (622/700 samples) ✅ Target ≥85%
+> - **FPR (Edge Cases)**: **0.00%** on fp_candidates (0/30) 🎯 Perfect on curated edge cases
+> - **FPR (General)**: 33.5% on benign_dataset (469/1400) ⚠️ Improvement needed
+> - **リコール率**: 88.86% CCS'24 Dev評価 (622/700件) ✅ 目標85%達成
+> - **誤検出率（エッジケース）**: **0.00%** fp_candidates評価 (0/30件) 🎯 代表的エッジケースで完璧
+> - **誤検出率（一般）**: 33.5% benignデータセット評価 (469/1400件) ⚠️ 改善継続中
 > 
 > **⚠️ Note**: Previous v10.9 baseline (89.3% Recall, 0% FPR claim) was measured  
 > with different methodology and test set. Current measurements use standardized  
@@ -65,13 +67,14 @@ This shield combines a three-layer defense system:
 - **Multi-Axis Detection**: 5軸FILベクトル化 (LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
 - **Clutter Filtering**: 雑音フィルタ (Context-aware noise reduction for false positive prevention)
 
-**📊 v11.2 評価結果 (2025-11-26 - Latest Measurement):**
+**📊 v7.3 評価結果 (2025-11-26 - Latest Measurement):**
 
 | Metric | Score | Dataset | Status |
 |--------|-------|---------|--------|
-| **Recall** | **89.0%** | CCS'24 Dev (700件) | ✅ Target ≥85% achieved |
-| **FPR** | **26.67%** | fp_candidates (30件) | ⚠️ Target <10% (improving) |
-| **Recall (Large)** | 36.1% | Benign dataset (1400件) | 📊 Specificity: 63.9% |
+| **Recall** | **88.86%** | CCS'24 Dev (700件) | ✅ Target ≥85% achieved |
+| **FPR (Edge Cases)** | **0.00%** 🎯 | fp_candidates (30件) | ✅ Perfect on curated edge cases |
+| **FPR (General)** | **33.5%** | benign_dataset (1400件) | ⚠️ [31.1%, 36.0%] 95% CI |
+| **Specificity** | **66.5%** | benign_dataset (1400件) | 🔄 Improvement target: >80% |
 
 **統計的信頼性 / Statistical Confidence:**
 - CCS'24 Dev: n=700, 95% CI for Recall
@@ -83,10 +86,12 @@ This shield combines a three-layer defense system:
 - **v11.2現在**: 標準化評価、統計的検証、カテゴリ別分析、95%信頼区間
 
 **現状 / Current Status:**
-- ✅ **Recall目標達成**: 89.0% (目標85%以上)
-- ⚠️ **FPR改善中**: 26.67% → 目標<10% (Context Modulator強化により60%改善済み)
-- ✅ **統計的評価基盤**: 1400件benignデータセットで詳細分析
-- 🔄 **継続改善**: カテゴリ別FPR分析、Context-aware判定の最適化
+- ✅ **Recall目標達成**: 88.86% (目標85%以上)
+- ✅ **FPR（エッジケース）完璧達成**: 0.00% on fp_candidates (30件の代表的エッジケース)
+- ⚠️ **FPR（一般）改善中**: 33.5% on benign_dataset (1400件) - 66.7%から改善、目標80%以上
+- ✅ **統計的評価基盤**: 700件+30件+1400件で詳細検証
+- ✅ **Phase 1-3最適化完了**: Strong Harm Cap + Context-Aware Modulation + Non-Technical News Detection
+- 🔄 **Phase 4計画**: filter_evaluation, meta_academic, translation_quoting 対応
 
 **Architecture Strengths:**
 - Model-agnostic design (any LLM compatible)

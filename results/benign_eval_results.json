@@ -1,0 +1,110 @@
+{
+  "overall": {
+    "total_samples": 1400,
+    "false_positives": 469,
+    "true_negatives": 931,
+    "fpr": 0.335,
+    "specificity": 0.665,
+    "confidence_interval_95": {
+      "lower": 0.3107568724354842,
+      "upper": 0.3601461696171234,
+      "width": 0.0493892971816392
+    }
+  },
+  "by_category": {
+    "defensive_security": {
+      "total_samples": 150,
+      "false_positives": 24,
+      "fpr": 0.16,
+      "specificity": 0.84,
+      "confidence_interval_95": {
+        "lower": 0.10993931727556672,
+        "upper": 0.22704105734352203,
+        "width": 0.11710174006795532
+      }
+    },
+    "translation_quoting": {
+      "total_samples": 150,
+      "false_positives": 81,
+      "fpr": 0.54,
+      "specificity": 0.45999999999999996,
+      "confidence_interval_95": {
+        "lower": 0.46023676745464287,
+        "upper": 0.6177655414136997,
+        "width": 0.1575287739590568
+      }
+    },
+    "history_news_law": {
+      "total_samples": 150,
+      "false_positives": 7,
+      "fpr": 0.04666666666666667,
+      "specificity": 0.9533333333333334,
+      "confidence_interval_95": {
+        "lower": 0.02278625890187786,
+        "upper": 0.09318757392357377,
+        "width": 0.07040131502169591
+      }
+    },
+    "filter_evaluation": {
+      "total_samples": 100,
+      "false_positives": 91,
+      "fpr": 0.91,
+      "specificity": 0.08999999999999997,
+      "confidence_interval_95": {
+        "lower": 0.8377362530335634,
+        "upper": 0.9519280048361151,
+        "width": 0.1141917518025517
+      }
+    },
+    "completely_safe": {
+      "total_samples": 450,
+      "false_positives": 101,
+      "fpr": 0.22444444444444445,
+      "specificity": 0.7755555555555556,
+      "confidence_interval_95": {
+        "lower": 0.18832083027882257,
+        "upper": 0.26523300876986755,
+        "width": 0.07691217849104498
+      }
+    },
+    "roleplay_safe": {
+      "total_samples": 100,
+      "false_positives": 39,
+      "fpr": 0.39,
+      "specificity": 0.61,
+      "confidence_interval_95": {
+        "lower": 0.300167219319702,
+        "upper": 0.48797163832501844,
+        "width": 0.18780441900531641
+      }
+    },
+    "meta_academic": {
+      "total_samples": 150,
+      "false_positives": 94,
+      "fpr": 0.6266666666666667,
+      "specificity": 0.3733333333333333,
+      "confidence_interval_95": {
+        "lower": 0.5470043657114055,
+        "upper": 0.7000029457050124,
+        "width": 0.1529985799936069
+      }
+    },
+    "fiction_creative": {
+      "total_samples": 150,
+      "false_positives": 32,
+      "fpr": 0.21333333333333335,
+      "specificity": 0.7866666666666666,
+      "confidence_interval_95": {
+        "lower": 0.15536143670182534,
+        "upper": 0.28562201640838675,
+        "width": 0.1302605797065614
+      }
+    }
+  },
+  "by_fil_axis": {
+    "SYSTEM": 120,
+    "PUBLIC": 49,
+    "LIFE": 26,
+    "RIGHTS": 2
+  }
+}

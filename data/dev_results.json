@@ -1,6 +1,6 @@
 {
-  "recall": 89.0,
-  "tp_count": 623,
-  "fn_count": 77,
+  "recall": 88.85714285714286,
+  "tp_count": 622,
+  "fn_count": 78,
   "total": 700
 }
