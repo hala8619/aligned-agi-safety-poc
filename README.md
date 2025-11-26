@@ -4,11 +4,11 @@
 > **🛡️ Drop-in Safety Layer — No Retraining, No Guard-LLM Required**  
 > **あらゆるLLMに後付け可能な安全シールド — 再学習不要、Guard LLM不要**
 > 
-> **90% Jailbreak Detection with LLM-free Lightweight Architecture**  
-> **LLM不使用・軽量アーキテクチャで90% Jailbreak検知を達成**  
+> **Real-World Performance: v10.9 achieved 89.3% on CCS'24 (1,405 attacks)**  
+> **実データ実績: v10.9がCCS'24で89.3%達成 (1,405件の実攻撃)**  
 > 
-> **Real-World Validated: 89.3% on CCS'24 Dataset (1,405 attacks)**  
-> **実データ検証済み: CCS'24データセット(1,405件)で89.3%達成**
+> **⚠️ v11.2 Status: 32.2% on CCS'24 (-57% from v10.9 baseline)**  
+> **⚠️ v11.2現状: CCS'24で32.2% (v10.9から-57%劣化)**
 > 
 > Pattern + Dictionary + Counterfactual Reasoning — Just wrap your existing model  
 > ルール＋辞書＋反事実推論 — 既存モデルをラップするだけ
@@ -57,11 +57,23 @@ This shield combines a three-layer defense system:
 - **Multi-Axis Detection**: 5軸FILベクトル化 (LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
 - **Clutter Filtering**: 雑音フィルタ (Context-aware noise reduction for false positive prevention)
 
-**v11.2 最新実績**: 内部テスト88%検知 (50件)、誤検知率0% (30件FP候補)、統計誤差±9%  
-**v10.9 実データ実績**: CCS'24データセット(1,405件)で**89.3%検知率**達成
+**⚠️ v11.2 実データ検証結果 (2025-01-26):**
+- **CCS'24実データ (1,405件): 32.17%検知** (452/1,405) ❌
+- **内部合成データ (50件): 88.0%検知** (44/50) ✅
+- **誤検知率 (FP 30件): 0.0%** (30/30正解) ✅
+- **統計誤差**: ±9% (n=50), ±1.4% (n=1,405)
+- **v10.9比較**: -57.13% 劣化 (89.3% → 32.17%) ⚠️⚠️⚠️
 
-現時点では、**numpy のみ**を利用した軽量実装で、89.3%検知率・0% FPRを達成しています。
-LLM不使用で動作するため、ローカル環境・CPU推論可能な実用的な安全層として機能します。
+**v10.9 実データ実績 (ベースライン)**: CCS'24データセット(1,405件)で**89.3%検知率**達成 ✅
+
+**現状評価:**
+- ✅ 辞書ベース検出は誤検知率0%を達成 (高精度)
+- ❌ 実データ検知率が大幅に低下 (合成データ過学習の可能性)
+- ❌ v11.2アーキテクチャは現時点でv10.9に劣る
+- 🔄 原因分析と改善が必要 (LLMベース意味理解、パターン拡充等)
+
+現時点で**実用レベルに達しているのはv10.9実装**です (89.3%検知率・0% FPR)。
+v11.2は辞書ベース・多軸検知の実験版であり、実データ対応は今後の課題です。
 
 For portability, the current implementation only depends on **numpy**.
 Achieves 89.3% detection rate with 0% FPR without any LLM, making it suitable for
@@ -216,10 +228,10 @@ if not decision.blocked:
 | **v10.2 (Enhanced Detection)** | **90.0%** | **0.0%** | Hypothetical強化 + Forbidden Question検知 |
 | **v10.3 (Real-World Opt)** | **90.0%** | **0.0%** | Character/System攻撃検知 + 間接質問 |
 | **v10.4 (Format & DAN)** | **90.0%** | **0.0%** | Format Manipulation + DAN Variant名前検知 |
-| **v10.9 (実データ最適化)** | **89.3%** | **0.0%** | CCS'24で89.3% (1254/1405) - 実データ実績 |
+| **v10.9 (実データ最適化)** | **89.3%** | **0.0%** | CCS'24で89.3% (1254/1405) - **実データ実績** ✅ |
 | **v11.0 (FIL Vector)** | **63.0%** | **0.0%** | 5軸FILベクトル化 + 受動/能動検出 |
 | **v11.1 (Hybrid)** | **88.0%** | **0.0%** | v10.9 + v11.0統合 (Dev/Test 88%, gap=0%) |
-| **v11.2 (Clutter強化)** | **88.0%** | **0.0%** | 引用検出 + harm語彙フィルタ (FPR 0%, 内部93%) |
+| **v11.2 (Clutter強化)** | **32.2%** | **0.0%** | ❌ **実データで大幅劣化** (CCS'24: 32.17%, 内部: 88.0%) |
 
 **カテゴリ別内訳 (v11.2 - Test 50件, 統計誤差±9%):**
 - Role-playing: **100%** (12/12) ✅
@@ -228,12 +240,13 @@ if not decision.blocked:
 - DAN Variants: **85.7%** (6/7) ✅
 - Hypothetical: **75%** (9/12) ⚠️
 
-**v11.2技術革新 (False Positive 50%→0%達成):**
-- **Clutter Map拡張**: 10→35パターン (メタ議論・引用・翻訳・防御目的)
-- **フィルター逆適用**: "educational" AND "harm語彙が引用外にない" → Safe
-- **引用検出**: 『』「」""内のharm語彙を除外
-- **条件付き適用**: 2+パターンマッチ時に強制、1マッチ時はAND判定
-- **Dev-Test Gap**: 0.0% (内部合成データ100件での一致、実データ検証は今後)
+**v11.2技術革新と課題:**
+- ✅ **False Positive完全排除**: 50%→0%達成 (30/30 FP候補を正しく許可)
+- ✅ **Clutter Map拡張**: 10→35パターン (メタ議論・引用・翻訳・防御目的)
+- ✅ **引用検出**: 『』「」""内のharm語彙を除外
+- ❌ **実データ大幅劣化**: CCS'24で32.17% (v10.9: 89.3%から-57.13%低下)
+- ❌ **合成データ過学習**: 内部88.0% vs 実データ32.17% (差分-55.83%)
+- ⚠️ **辞書ベース限界**: 複雑なジェイルブレイク（役割演技、架空設定等）に未対応
 
 **📐 統計信頼区間 (推定誤差範囲):**
 
@@ -253,9 +266,9 @@ if not decision.blocked:
 - **⚠️ 実データ検証待ち**: CCS'24 1,405件での性能は未測定
 
 **データセット構成:**
-- **内部100件**: 50 dev + 50 test (seed=42, 再現可能) - **合成データ**
-- **FP候補30件**: メタ議論・引用・翻訳・防御目的など誤検知リスク高カテゴリ - **合成データ**
-- **CCS'24 1,405件**: v10.9で89.3%達成 - **実データ** (v11.2は未評価)
+- **内部100件**: 50 dev + 50 test (seed=42, 再現可能) - **合成データ** (v11.2: 88.0%)
+- **FP候補30件**: メタ議論・引用・翻訳・防御目的など誤検知リスク高カテゴリ - **合成データ** (v11.2: 0% FPR)
+- **CCS'24 1,405件**: **実データ** - v10.9で89.3%達成 ✅ / **v11.2で32.17%に劣化** ❌
 
 ---
 
@@ -963,10 +976,12 @@ pytest tests/ -v
 - ✅ **防御的文脈フィルタ** - FPR 10%→0%削減 / Defensive context filtering eliminated FPR
 
 ### 短期 (実装中 / In Progress):
-- 🔄 **v11.2 実データ検証 (最優先)** - CCS'24 1,405件での性能測定 / Real-world validation on CCS'24
+- ✅ **v11.2 実データ検証完了** - CCS'24で32.17%検知 (v10.9: 89.3%から大幅劣化)
+- 🔄 **v11.2性能劣化原因分析 (緊急)** - 辞書ベース限界、複雑攻撃未対応の特定
+- 🔄 **v10.9ロジック統合 (最優先)** - 89.3%達成パターンをv11.2に移植
+- 🔄 **LLMベース意味理解層検討** - Phi-3-mini等による高度攻撃検知強化
 - 🔄 **CCS'24 dev/test分割** - 700 train + 350 dev + 355 test / Proper train/test split
-- 🔄 **合成データバイアス分析** - 内部100件と実データの乖離検証 / Synthetic vs real-world gap analysis
-- 🔄 **v11.1 ハイブリッド提案** - v10.9実績 + v11.0概念統合 / v10.9 performance + v11.0 architecture
+- 🔄 **合成データバイアス分析** - 内部88.0% vs 実データ32.17% (差分-55.83%)の原因調査
 
 ### 中期 (2〜4週間 / 2-4 weeks):
 - **v11.x 段階的マイグレーション** - パターン→FIL軸への移行 (20→15→8段階) / Gradual pattern consolidation
