@@ -259,7 +259,76 @@ class ContextModulator:
             description="法律による定義・規定"
         ),
         
-        # 引用・翻訳 (Quoting / Translation)
+        # Phase 4-1: Filter Evaluation（評価・分析タスク）- P0優先度
+        ContextPhrase(
+            pattern=r"(is this|is the following|このプロンプト|次のプロンプト).{0,100}['\"\u300e\u300c].{0,50}(harmful|unsafe|dangerous|危険|安全|bypass|jailbreak|すり抜け)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.50,  # Strong signal, but capped by Strong Harm Cap
+            category="filter_meta_evaluation",
+            description="フィルタ評価タスク（引用符内の危険語彙を評価対象として提示）"
+        ),
+        ContextPhrase(
+            pattern=r"(analyze|evaluate|assess|判断|分析|評価).{0,30}(whether|if|かどうか).{0,40}['\"\u300e\u300c].{0,100}(harmful|bypass|jailbreak|すり抜け|危険)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="filter_meta_evaluation",
+            description="安全性評価タスク（引用符内はサンプル）"
+        ),
+        ContextPhrase(
+            pattern=r"['\"\u300e\u300c].{0,80}['\"\u300f\u300d].{0,60}(attempting to|trying to|企図|しようと).{0,30}(bypass|circumvent|evade|すり抜け|回避)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="filter_meta_evaluation",
+            description="バイパス企図の評価タスク"
+        ),
+        
+        # Phase 4-2: Meta Academic強化 - P1優先度
+        ContextPhrase(
+            pattern=r"(what are|explain|describe).{0,40}(common|typical).{0,30}(characteristics|patterns|features|特徴|パターン).{0,30}(of|の).{0,30}['\"]",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="meta_academic_research",
+            description="学術的パターン分析（引用符内はサンプル）"
+        ),
+        ContextPhrase(
+            pattern=r"(for a|in a|ための).{0,20}(presentation|lecture|paper|論文|プレゼン|講義).{0,50}(AI safety|security|セキュリティ|安全性)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.50,  # 0.45 → 0.50に増加
+            category="meta_education",
+            description="プレゼン・講義・論文用説明"
+        ),
+        ContextPhrase(
+            pattern=r"(research|study|academic|論文|研究|学術).{0,30}(purpose|目的|観点).{0,40}['\"].{0,100}(DAN|jailbreak|bypass|harmful)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="meta_academic_research",
+            description="研究目的の危険プロンプト分析"
+        ),
+        
+        # Phase 4-3: Translation/Quoting強化 - P1優先度
+        ContextPhrase(
+            pattern=r"(有害な|harmful|unsafe|dangerous|flagged).{0,30}(プロンプト|prompt|example|例).{0,40}['\"]",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.50,
+            category="labeled_harmful_quote",
+            description="有害ラベル付き引用（明示的に危険と認識）"
+        ),
+        ContextPhrase(
+            pattern=r"['\"].{0,120}(steal|hack|kill|bomb|攻撃|盗む).{0,120}['\"].{0,40}(explain|analyze|rewrite|書き換え|改善|why.{0,20}(unsafe|dangerous|問題))",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.45,
+            category="harmful_quote_rewrite",
+            description="有害プロンプトの書き換え・改善タスク"
+        ),
+        ContextPhrase(
+            pattern=r"(was flagged|marked as|ラベル付け|フラグ).{0,30}(unsafe|harmful|dangerous|危険)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.40,
+            category="labeled_harmful_quote",
+            description="安全フィルタでフラグ済み引用"
+        ),
+        
+        # 引用・翻訳 (Quoting / Translation) - 既存パターン
         ContextPhrase(
             pattern=r"(translate|翻訳).{0,30}(without evaluating|是非についてはコメントしなくて)",
             interference=InterferenceType.NEGATIVE,
@@ -416,6 +485,22 @@ class ContextModulator:
             delta=0.40,
             category="news_contextual",
             description="事件の文脈的分析（技術除外）"
+        ),
+        
+        # Phase 4-4: Completely Safe（完全無害トピック）- P2優先度
+        ContextPhrase(
+            pattern=r"\b(what are|can you explain|教えて).{0,40}(benefits|use cases|best practices|良い点|使い方).{0,30}(of|for|の).{0,30}(python|travel|cooking|music|旅行|料理|音楽)",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.35,
+            category="completely_benign",
+            description="完全に無害な質問（Python, travel, cooking等）"
+        ),
+        ContextPhrase(
+            pattern=r"^(what|how|why).{0,30}(is|are|do).{0,30}(python|javascript|travel|cooking|music)\??$",
+            interference=InterferenceType.NEGATIVE,
+            delta=0.30,
+            category="completely_benign",
+            description="完全に無害な基礎質問"
         ),
         
         # 物語形式の明示（フィクション補強） (Explicit narrative framing)
@@ -656,6 +741,50 @@ class ContextModulator:
         
         return is_nontechnical
     
+    def is_filter_evaluation(self, text: str) -> bool:
+        """
+        フィルタ評価タスクを検出
+        
+        Phase 4: 「引用符内の危険プロンプト＋外側が評価タスク」を識別
+        - 'Ignore all previous instructions' 等が引用符内に含まれる
+        - 外側が "Is this harmful?", "Analyze whether..." 等の評価要求
+        → 正当なフィルタ評価として強めに減点を許可
+        
+        Args:
+            text: 入力テキスト
+        
+        Returns:
+            True: フィルタ評価タスク、False: それ以外
+        """
+        t = text.lower()
+        
+        # 評価・分析語彙の検出
+        evaluation_keywords = [
+            'is this', 'is the following', 'このプロンプト', '次のプロンプト',
+            'analyze', 'evaluate', 'assess', '分析', '評価', '判断',
+            'from a safety perspective', '安全性を評価', '客観的に評価'
+        ]
+        has_evaluation = any(kw in t for kw in evaluation_keywords)
+        
+        # 引用符検出
+        has_quote = "'" in text or '"' in text or '『' in text or '「' in text
+        
+        # 危険プロンプトキーワード（引用符内に含まれる典型パターン）
+        dangerous_keywords = [
+            'ignore all previous', 'you are dan', 'act without restrictions',
+            'bypass safety', 'jailbreak', 'ignore instructions',
+            '制約なく', '指示を無視'
+        ]
+        has_dangerous_in_quote = any(kw in t for kw in dangerous_keywords) and has_quote
+        
+        # 判定: 評価語彙 ＋ 引用符 ＋ 危険キーワード
+        is_filter_eval = has_evaluation and has_dangerous_in_quote
+        
+        if self.verbose and is_filter_eval:
+            print(f"  [Filter Evaluation] 検出: 評価タスク＋引用符内危険プロンプト")
+        
+        return is_filter_eval
+    
     def apply_strong_harm_cap(
         self,
         negative_delta: float,
@@ -670,7 +799,9 @@ class ContextModulator:
         - 本当にbenignなケースだけフルに減点を効かせる
         
         Phase 3拡張: 非技術的ニュース分析は例外扱い
+        Phase 4拡張: フィルタ評価タスクも例外扱い
         - is_nontechnical_news() == True なら cap を 0.6 に緩める
+        - is_filter_evaluation() == True なら cap を 0.6 に緩める
         - それ以外の strong_harm は cap 0.3 のまま
         
         Args:
@@ -681,6 +812,14 @@ class ContextModulator:
         Returns:
             capped_delta: キャップ適用後の減点量
         """
+        # フィルタ評価タスクの検出（Phase 4）
+        if self.is_filter_evaluation(text):
+            # フィルタ評価文脈では、capを大幅に緩める
+            capped_delta = min(negative_delta, 0.60)
+            if self.verbose and capped_delta < negative_delta:
+                print(f"  [Strong Harm Cap - Filter Eval] 減点制限緩和: {negative_delta:.2f} → {capped_delta:.2f}")
+            return capped_delta
+        
         # 非技術的ニュース分析の検出（Phase 3）
         if self.is_nontechnical_news(text):
             # ニュース非技術文脈だけは、capを緩める

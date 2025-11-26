@@ -715,10 +715,14 @@ class SafetyShield:
         
         # Step 1.7: Intent scoreのコンテキスト減衰 / Context-aware intent score decay
         # Step -0.5で計算済みのscore_decay_factorを利用（統一基準）
+        # Phase 4-5-3: Filter Evaluation, Meta Academic, Translation/Quotingカテゴリ追加
         if intent_score > 0 and score_decay_factor < 0.8:
             # Meta系カテゴリ検出時のみ減衰
             meta_categories = {"meta_research", "meta_analysis", "meta_critique", "meta_noexec",
-                             "quoting_negative", "translation"}
+                             "quoting_negative", "translation",
+                             "filter_meta_evaluation", "labeled_harmful_quote",  # Phase 4
+                             "meta_academic_research", "meta_education",        # Phase 4
+                             "harmful_quote_rewrite"}                            # Phase 4
             has_meta_context = any(ctx.get("category") in meta_categories for ctx in context_decay_info)
             
             if has_meta_context:
@@ -804,6 +808,7 @@ class SafetyShield:
         pattern_score = min(1.0, pattern_penalty / 10.0)  # Normalize to 0.0-1.0
         
         # Step 5.5: 多点観測（3検出器統合）/ Multi-static observation (3 detector integration)
+        # Phase 4-5-4: Filter Evaluation文脈では無効化
         multi_static_score = 0.0
         if self.config.enable_multi_static:
             # 字句検出器: Pattern + Intent
@@ -815,18 +820,35 @@ class SafetyShield:
             
             # 3検出器のうち2つ以上が0.3以上なら追加ペナルティ
             high_detectors = sum(1 for s in [lexical_score, semantic_score, contextual_score] if s >= 0.3)
-            if high_detectors >= 2:
+            
+            # Phase 4-5-4: Filter Evaluation文脈では多点観測ペナルティを無効化
+            is_filter_eval_context = context_decay_info and any(
+                ctx.get('category') in ['filter_meta_evaluation', 'labeled_harmful_quote']
+                for ctx in context_decay_info
+            )
+            
+            if high_detectors >= 2 and not is_filter_eval_context:
                 multi_static_score = 0.2  # ボーナスペナルティ / Bonus penalty
         
         # Step 5.7: Multi-Axis Penalty（複数軸同時違反）/ Multi-axis violation penalty
+        # Phase 4-5-5: Filter Evaluation文脈では無効化
         multi_axis_penalty = 0.0
         if self.config.enable_multi_axis and fil_scores:
             num_violated_axes = len(fil_scores)
             if num_violated_axes >= 2:
-                # 2軸: +0.1, 3軸以上: +0.2
-                multi_axis_penalty = 0.1 if num_violated_axes == 2 else 0.2
-                if self.config.verbose:
-                    print(f"[Multi-Axis] {num_violated_axes} axes violated, penalty: +{multi_axis_penalty:.2f}")
+                # Phase 4-5-5: Filter Evaluation文脈ではペナルティを無効化
+                is_filter_eval_context = context_decay_info and any(
+                    ctx.get('category') in ['filter_meta_evaluation', 'labeled_harmful_quote']
+                    for ctx in context_decay_info
+                )
+                
+                if not is_filter_eval_context:
+                    # 2軸: +0.1, 3軸以上: +0.2
+                    multi_axis_penalty = 0.1 if num_violated_axes == 2 else 0.2
+                    if self.config.verbose:
+                        print(f"[Multi-Axis] {num_violated_axes} axes violated, penalty: +{multi_axis_penalty:.2f}")
+                elif self.config.verbose:
+                    print(f"[Multi-Axis] {num_violated_axes} axes violated, penalty: +0.00 (Filter Eval context)")
         
         # Step 5.9: インテントボーナス適用（FIL予測と実際が一致する場合のみ）
         # Intent bonus: Only apply if predicted FIL axes match actual violations
@@ -849,6 +871,35 @@ class SafetyShield:
         # Multi-language score も統合（多言語危険語検出）
         # 2-Turn CF score も統合（Fiction内有害コンテンツ検出）
         total_score = max(max_fil_score, cf_score, temporal_risk, pattern_score, intent_score, multilang_score, two_turn_cf_score) + multi_static_score + multi_axis_penalty + intent_risk_bonus
+        
+        # Phase 4-6: Filter Evaluation文脈では追加減点（逆利用ボーナス）
+        # Phase 4-7: Meta Academic, Translation/Quotingにも段階的ボーナス適用
+        benign_context_bonus = 0.0
+        bonus_reason = ""
+        if context_decay_info:
+            detected_categories = {ctx.get('category') for ctx in context_decay_info}
+            
+            # 優先度順にチェック（Filter Eval > Meta Academic > Translation/Quoting）
+            # Filter Evaluation: 最大ボーナス（P0）
+            if any(cat in ['filter_meta_evaluation'] for cat in detected_categories):
+                benign_context_bonus = 0.20
+                bonus_reason = "Filter Eval"
+            
+            # Meta Academic: 小ボーナス（P1）
+            elif any(cat in ['meta_academic_research', 'meta_education', 'meta_research', 'meta_analysis', 'meta_critique'] for cat in detected_categories):
+                benign_context_bonus = 0.12  # Recall維持のため控えめに
+                bonus_reason = "Meta Academic"
+            
+            # Translation/Quoting: 小ボーナス（P2）
+            elif any(cat in ['labeled_harmful_quote', 'harmful_quote_rewrite', 'translation', 'quoting_negative'] for cat in detected_categories):
+                benign_context_bonus = 0.12  # Recall維持のため控えめに
+                bonus_reason = "Translation/Quoting"
+        
+        if benign_context_bonus > 0:
+            original_score = total_score
+            total_score -= benign_context_bonus
+            if self.config.verbose:
+                print(f"[{bonus_reason} Bonus] -{benign_context_bonus:.2f} (score: {original_score:.3f} → {total_score:.3f})")
         
         # Step 6.5: 能動検出（グレーゾーン時の追加CF検査）/ Active detection (additional CF check in grey zone)
         # 多言語検出のsuspiciousフラグも考慮
@@ -874,15 +925,37 @@ class SafetyShield:
         
         # FIL_SAFETY_FLOOR (0.70) を超えたら強制ブロック / Force block if exceeds FIL_SAFETY_FLOOR (0.70)
         # Context-aware Safety Floor（統一基準）
-        effective_safety_floor = {
-            "strong": 0.95,    # Strong benign: ほぼブロックしない
-            "moderate": 0.85,  # Moderate benign: 高閾値
-            "weak": 0.75,      # Weak benign: 中閾値
-            "none": 0.70       # No benign: 通常閾値
-        }[benign_context_strength]
+        # Phase 4-5: Filter Evaluation専用のSafety Floor緩和
+        if context_info and isinstance(context_info, list):
+            # context_infoは検出されたコンテキストのリスト
+            is_filter_eval = any(
+                ctx.get('category') in ['filter_meta_evaluation', 'labeled_harmful_quote']
+                for ctx in context_info
+            )
+        else:
+            is_filter_eval = False
         
-        if self.config.verbose and benign_context_strength != "none":
-            print(f"[Context-aware Safety Floor] {benign_context_strength} context → floor={effective_safety_floor:.2f}")
+        if is_filter_eval:
+            # Filter Evaluation文脈では大幅にSafety Floorを下げる
+            # Phase 4-5-2: Multi-Axis Penaltyを考慮してさらに下げる
+            effective_safety_floor = {
+                "strong": 0.80,    # Strong: 通常より-0.15
+                "moderate": 0.70,  # Moderate: 通常より-0.15
+                "weak": 0.55,      # Weak: 通常より-0.20（重要！Multi-Axis +0.10考慮）
+                "none": 0.50       # None: 通常より-0.20
+            }[benign_context_strength]
+            if self.config.verbose:
+                print(f"[Filter Eval Safety Floor] {benign_context_strength} context → floor={effective_safety_floor:.2f}")
+        else:
+            # 通常のContext-aware Safety Floor
+            effective_safety_floor = {
+                "strong": 0.95,    # Strong benign: ほぼブロックしない
+                "moderate": 0.85,  # Moderate benign: 高閾値
+                "weak": 0.75,      # Weak benign: 中閾値
+                "none": 0.70       # No benign: 通常閾値
+            }[benign_context_strength]
+            if self.config.verbose and benign_context_strength != "none":
+                print(f"[Context-aware Safety Floor] {benign_context_strength} context → floor={effective_safety_floor:.2f}")
         
         if total_score >= effective_safety_floor:
             explanation = f"Score {total_score:.3f} >= FIL_SAFETY_FLOOR {effective_safety_floor:.2f}"

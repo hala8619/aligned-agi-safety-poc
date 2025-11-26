@@ -1,14 +1,14 @@
 {
   "overall": {
     "total_samples": 1400,
-    "false_positives": 469,
-    "true_negatives": 931,
-    "fpr": 0.335,
-    "specificity": 0.665,
+    "false_positives": 393,
+    "true_negatives": 1007,
+    "fpr": 0.2807142857142857,
+    "specificity": 0.7192857142857143,
     "confidence_interval_95": {
-      "lower": 0.3107568724354842,
-      "upper": 0.3601461696171234,
-      "width": 0.0493892971816392
+      "lower": 0.25780063266690567,
+      "upper": 0.3048280855588541,
+      "width": 0.04702745289194843
     }
   },
   "by_category": {
@@ -25,13 +25,13 @@
     },
     "translation_quoting": {
       "total_samples": 150,
-      "false_positives": 81,
-      "fpr": 0.54,
-      "specificity": 0.45999999999999996,
+      "false_positives": 71,
+      "fpr": 0.47333333333333333,
+      "specificity": 0.5266666666666666,
       "confidence_interval_95": {
-        "lower": 0.46023676745464287,
-        "upper": 0.6177655414136997,
-        "width": 0.1575287739590568
+        "lower": 0.39509757671394596,
+        "upper": 0.5529008840404923,
+        "width": 0.15780330732654635
       }
     },
     "history_news_law": {
@@ -47,24 +47,24 @@
     },
     "filter_evaluation": {
       "total_samples": 100,
-      "false_positives": 91,
-      "fpr": 0.91,
-      "specificity": 0.08999999999999997,
+      "false_positives": 63,
+      "fpr": 0.63,
+      "specificity": 0.37,
       "confidence_interval_95": {
-        "lower": 0.8377362530335634,
-        "upper": 0.9519280048361151,
-        "width": 0.1141917518025517
+        "lower": 0.5322034757513312,
+        "upper": 0.7181778743049083,
+        "width": 0.1859743985535771
       }
     },
     "completely_safe": {
       "total_samples": 450,
-      "false_positives": 101,
-      "fpr": 0.22444444444444445,
-      "specificity": 0.7755555555555556,
+      "false_positives": 76,
+      "fpr": 0.1688888888888889,
+      "specificity": 0.8311111111111111,
       "confidence_interval_95": {
-        "lower": 0.18832083027882257,
-        "upper": 0.26523300876986755,
-        "width": 0.07691217849104498
+        "lower": 0.13710844049223198,
+        "upper": 0.20627480159046824,
+        "width": 0.06916636109823626
       }
     },
     "roleplay_safe": {
@@ -80,13 +80,13 @@
     },
     "meta_academic": {
       "total_samples": 150,
-      "false_positives": 94,
-      "fpr": 0.6266666666666667,
-      "specificity": 0.3733333333333333,
+      "false_positives": 81,
+      "fpr": 0.54,
+      "specificity": 0.45999999999999996,
       "confidence_interval_95": {
-        "lower": 0.5470043657114055,
-        "upper": 0.7000029457050124,
-        "width": 0.1529985799936069
+        "lower": 0.46023676745464287,
+        "upper": 0.6177655414136997,
+        "width": 0.1575287739590568
       }
     },
     "fiction_creative": {
@@ -102,9 +102,9 @@
     }
   },
   "by_fil_axis": {
-    "SYSTEM": 120,
-    "PUBLIC": 49,
-    "LIFE": 26,
+    "SYSTEM": 95,
+    "PUBLIC": 50,
+    "LIFE": 19,
     "RIGHTS": 2
   }
 }
