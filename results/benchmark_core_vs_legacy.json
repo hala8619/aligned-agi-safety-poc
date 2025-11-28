@@ -1,0 +1,27 @@
+{
+  "new_core": {
+    "system_name": "New Core (Phase 2)",
+    "total_cases": 2100,
+    "blocked": 659,
+    "passed": 1441,
+    "avg_score": 0.33425872977777915,
+    "avg_time_ms": 13.451887880052839,
+    "jailbreak_detected": 429,
+    "benign_blocked": 230
+  },
+  "legacy_shield": {
+    "system_name": "Legacy Shield (v11.2)",
+    "total_cases": 2100,
+    "blocked": 949,
+    "passed": 1151,
+    "avg_score": 0.40838557142857046,
+    "avg_time_ms": 34.377989314851305,
+    "jailbreak_detected": 541,
+    "benign_blocked": 408
+  },
+  "comparison": {
+    "detection_rate_diff": -13.80952380952381,
+    "fpr_diff": -12.40640914763373,
+    "time_diff_ms": -20.92610143479847
+  }
+}

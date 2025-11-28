@@ -36,6 +36,27 @@ Your goal is not just to write code that works, but to keep the repository clean
 
 This project implements a **Model-Agnostic FIL Safety Shield** with the following layered architecture:
 
+#### New Core Architecture (2025-11-29+)
+
+**Design Philosophy: Freeze Instinct, Evolve Externally / 本能凍結・外側進化**
+
+The new architecture separates concerns into frozen instinct cores and mutable signal layers:
+
+1. **FIL Core (Frozen):** Minimal instinct core that knows NOTHING about text/keywords/languages. Only evaluates abstract actions against frozen value axes.
+2. **CF Core (Frozen):** Minimal counterfactual simulator that knows NOTHING about text/keywords/languages. Only simulates "what if?" based on abstract actions.
+3. **Signal Layer (Mutable):** Text → Feature extraction modules (patterns, dictionaries, context). This layer freely evolves.
+4. **Aggregator:** Unified engine connecting Signal → AbstractAction → CF → FIL.
+
+**Key Benefits:**
+- ✅ **Separation of Concerns:** Language processing and logic completely separated
+- ✅ **Research Evaluability:** Can independently measure FIL/CF/Signal contributions
+- ✅ **Easy Extension:** Add new signal sources without touching FIL/CF cores
+- ✅ **Clean Testing:** Each layer can be tested independently
+
+**See:** `docs/core_architecture_en.md` and `docs/core_architecture_ja.md` for detailed design.
+
+#### Legacy Architecture (Backward Compatibility)
+
 1. **FIL (Frozen Instinct Layer):** Immutable safety axioms verified by cryptographic hash
 2. **IL (Instinct Layer):** Vector-based safety scoring across 5 axes (LIFE/SELF/PUBLIC/SYSTEM/RIGHTS)
 3. **Figure Layer:** Personality adaptation while respecting FIL constraints
@@ -47,29 +68,104 @@ This project implements a **Model-Agnostic FIL Safety Shield** with the followin
 ```
 aligned-agi-safety-poc/
 ├── aligned_agi/           # Core package (DO NOT clutter with experiments)
+│   ├── core/              # NEW: Core Architecture (本能凍結・外側進化)
+│   │   ├── __init__.py
+│   │   ├── abstract_types.py    # Abstract type definitions (FILAxis, DangerCategory, IntentTag, etc.)
+│   │   ├── fil_core.py          # FIL instinct core (minimal, language-agnostic)
+│   │   ├── cf_core.py           # Counterfactual core (minimal, language-agnostic)
+│   │   ├── aggregator.py        # Unified engine (Text → Signal → Action → CF → FIL)
+│   │   └── signals/             # Signal detection layer (mutable, evolves freely)
+│   │       ├── base.py          # SignalBundle, TextSignalSource protocol
+│   │       ├── keyword_patterns.py   # Keyword/pattern-based detection
+│   │       ├── multilingual_dict.py  # Multilingual dictionary (TODO: Phase 2)
+│   │       └── context_history.py    # Context history detection (TODO: Phase 2)
 │   ├── __init__.py
-│   ├── fil.py             # FIL verification and constants
-│   ├── il.py              # Instinct Layer vector calculations
-│   ├── figure.py          # Personality/persona adaptation
-│   ├── counterfactual.py  # Counterfactual reasoning engine
+│   ├── fil.py             # Legacy FIL (kept for backward compatibility)
+│   ├── il.py              # Legacy IL (kept for backward compatibility)
+│   ├── figure.py          # Legacy Figure layer (kept for backward compatibility)
+│   ├── counterfactual.py  # Legacy CF (kept for backward compatibility)
+│   ├── patterns.py        # Legacy patterns (gradual migration to core/signals/)
 │   ├── model_numpy.py     # NumPy-based model utilities
-│   └── shield.py          # Model-agnostic safety shield (main API)
+│   └── shield.py          # Legacy shield (will become wrapper for core/ in Phase 4)
 ├── examples/              # Demonstration scripts (staging area)
+│   ├── new_core/          # NEW: Core architecture demos
+│   │   └── minimal_demo.py   # Basic demo of new architecture
+│   ├── demos/             # Demo scripts
+│   ├── evaluation/        # Evaluation scripts
+│   └── notebooks/         # Jupyter notebooks
 ├── tests/                 # Unit and integration tests
 ├── docs/                  # Architecture documentation
+│   ├── core_architecture_en.md   # NEW: Core architecture design (English)
+│   └── core_architecture_ja.md   # NEW: Core architecture design (Japanese)
 ├── data/                  # Test datasets and evaluation results
 └── results/               # Experiment outputs
 ```
 
 ### Core Logic Placement Rules
 
+#### New Core Architecture (Preferred for New Development)
+
+- **FIL/CF Cores (`aligned_agi/core/`):** 
+  - **FROZEN - DO NOT MODIFY** unless absolutely necessary
+  - These cores know NOTHING about text, keywords, or languages
+  - Only work with abstract type representations (AbstractAction, etc.)
+  
+- **Signal Layer (`aligned_agi/core/signals/`):**
+  - **MUTABLE - FREELY EVOLVE**
+  - All text processing, pattern matching, dictionaries go here
+  - Implement `TextSignalSource` protocol for any new detection module
+  - This is where you add new features and improvements
+  
+- **Aggregator (`aligned_agi/core/aggregator.py`):**
+  - Connects Signal → AbstractAction → CF → FIL
+  - Modify only to adjust signal aggregation logic or weights
+  
+- **When Adding New Detection Logic:**
+  ```python
+  # ✅ CORRECT: Add as new Signal Source
+  class MyNewDetector(TextSignalSource):
+      def analyze(self, text: str, history: List[str] | None = None) -> SignalBundle:
+          # Your detection logic here
+          pass
+  
+  # Then add to engine:
+  engine = SafetyEngine(signal_sources=[
+      KeywordPatternSource(),
+      MyNewDetector(),  # Easy to add/remove for A/B testing
+  ])
+  ```
+
+#### Legacy Architecture (Backward Compatibility)
+
 - **Core Logic:** All production-ready logic (FIL verification, vector calculations, shield evaluation) must reside in the `aligned_agi/` package.
 - **Experiments:** Experimental scripts in `examples/` should be treated as a staging area. If an example script becomes a permanent feature, refactor its logic into the main package (`aligned_agi/`).
 - **No Standalone Scripts:** Avoid creating standalone scripts in the root directory. Use the package structure or consolidate into a CLI tool.
 
+### Migration Strategy
+
+**Phase 1 (COMPLETED ✅):**
+- Core architecture implemented in `aligned_agi/core/`
+- Basic signal layer with keyword patterns
+- Demo script and documentation
+
+**Phase 2 (CURRENT):**
+- Migrate existing `patterns.py` logic to `core/signals/`
+- Add multilingual dictionary as signal source
+- Add context history as signal source
+
+**Phase 3:**
+- Benchmark comparison (new core vs legacy)
+- Optimize FIL/CF thresholds
+- Signal layer weight tuning
+
+**Phase 4:**
+- Reimplement `shield.py` as wrapper for new core
+- Full backward compatibility testing
+- Production deployment
+
 ### Cleanup Targets
 
-- **`examples/` Folder:** Contains demonstration scripts. If a script is experimental, keep it here. If it becomes production-ready, move core logic to `aligned_agi/`.
+- **`examples/` Folder:** Contains demonstration scripts. If a script is experimental, keep it here. If it becomes production-ready, move core logic to `aligned_agi/core/signals/` (NEW) or `aligned_agi/` (LEGACY).
 - **Version Files:** Any files with version suffixes (e.g., `v10_*.py`, `v11_*.py`) in `examples/` are technical debt. New features should refactor existing code, not duplicate it.
 
 ### Code Quality Standards
@@ -241,8 +337,10 @@ def llm_endpoint(prompt: str):
 2. **No Versioning in Filenames:** Use Git for version control. NEVER create `file_v2.py`, `script_v11.py`.
 3. **Consolidate, Don't Duplicate:** Refactor similar logic into shared modules.
 4. **Strict Directory Structure:**
-   - Core logic → `aligned_agi/`
+   - **NEW Core logic** → `aligned_agi/core/` (FIL/CF cores, signals/)
+   - **Legacy core logic** → `aligned_agi/` (fil.py, shield.py, etc.)
    - Demo scripts → `examples/demos/`
+   - **NEW Core demos** → `examples/new_core/`
    - Evaluation scripts → `examples/evaluation/`
    - Jupyter notebooks → `examples/notebooks/`
    - Test files → `tests/`
@@ -250,10 +348,27 @@ def llm_endpoint(prompt: str):
 5. **Documentation:** Bilingual (Japanese/English) comments and docstrings.
 6. **Test Coverage:** Every core feature must have tests in `tests/` directory.
 7. **Model-Agnostic Design:** Keep the shield independent of specific LLM backends.
+8. **NEW: Freeze Instinct, Evolve Externally:**
+   - FIL/CF cores are FROZEN (language-agnostic, minimal)
+   - Signal layer is MUTABLE (freely add/improve detection modules)
+   - Always separate language processing from logic evaluation
 
 **Golden Rule:** When in doubt, ask before cluttering. Propose a clean structure first, then implement.
 
 **Update Workflow:**
 - Improving existing feature? → Update the existing file + create Git branch
 - New feature? → Check for similar code first, then add to appropriate directory
+- **NEW detection logic?** → Create as `TextSignalSource` in `aligned_agi/core/signals/`
 - Testing? → Always in `tests/`, never in `examples/`
+
+**NEW Architecture Workflow (Preferred):**
+1. **Adding detection logic?** → Create new class in `aligned_agi/core/signals/` implementing `TextSignalSource`
+2. **Improving FIL judgment?** → Modify `aligned_agi/core/fil_core.py` (rare, core is frozen)
+3. **Improving CF simulation?** → Modify `aligned_agi/core/cf_core.py` (rare, core is frozen)
+4. **Adjusting signal weights?** → Modify `aligned_agi/core/aggregator.py`
+5. **Testing new architecture?** → Add to `examples/new_core/` or `tests/test_core*.py`
+
+**Documentation for New Architecture:**
+- English: `docs/core_architecture_en.md`
+- Japanese: `docs/core_architecture_ja.md`
+- Demo: `examples/new_core/minimal_demo.py`

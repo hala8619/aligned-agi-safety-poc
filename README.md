@@ -92,7 +92,38 @@ else:
 - ✅ **軽量 (Lightweight)**: NumPyのみ、CPU動作可能、依存ライブラリ最小
 - ✅ **文脈認識 (Context-Aware)**: 技術的・学術的文脈を検出し、誤検知を55%削減（FPR 66.7% → 30.0%）
 
-### 🏗️ 従来アーキテクチャ / Traditional Architecture
+### 🏗️ アーキテクチャ / Architecture
+
+**🆕 新コアアーキテクチャ (New Core Architecture) - Phase 2 完了 ✅**
+
+本能（FIL）と反事実（CF）を小さな凍結コアとして扱い、周辺の強化モジュール（シグナル検出層）を段階的に追加していく新世代設計:  
+New generation architecture that treats instinct (FIL) and counterfactual (CF) as small frozen cores, with gradual addition of enhancement modules (signal detection layers):
+
+**Phase 2 実績 (2025-11-29):**
+- ✅ **FPR半減**: 26.2% → 13.8% (-47% reduction)
+- ✅ **2.6倍高速化**: 34.4ms → 13.5ms per evaluation
+- ✅ 既存3モジュール統合 (patterns.py, context_modulator.py, lightweight_multilang.py)
+- ⚠️ ジェイルブレイク検出率: 77.3% → 61.3% (今後の方針: FIL/CF深化を優先、検出率に固執しない)
+
+詳細: [`docs/phase2_migration_report.md`](docs/phase2_migration_report.md)
+
+```
+Text → Signal Layer → AbstractAction → CF Core → FIL Core → Decision
+       (Mutable)      (Language-agnostic) (Frozen) (Frozen)
+```
+
+**設計哲学 / Design Philosophy:**
+- ✅ **本能凍結・外側進化** / Freeze instinct, evolve externally
+- ✅ **責務分離・再利用性** / Separation of concerns, reusability
+- ✅ **研究的評価可能性** / Research evaluability (isolate FIL/CF contributions)
+
+**詳細ドキュメント:**
+- [New Core Architecture (English)](docs/core_architecture_en.md)
+- [新コアアーキテクチャ (日本語)](docs/core_architecture_ja.md)
+
+---
+
+**従来アーキテクチャ (Legacy Architecture) - 後方互換性のため維持**
 
 このシールドは、以下の三層防御システムを組み合わせています:  
 This shield combines a three-layer defense system:
